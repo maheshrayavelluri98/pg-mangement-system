@@ -8,6 +8,8 @@ import {
   FaMoneyBillWave,
   FaUserCircle,
   FaBuilding,
+  FaCalendarAlt,
+  FaFileInvoiceDollar,
 } from "react-icons/fa";
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen, auth }) => {
@@ -100,7 +102,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, auth }) => {
           </NavLink>
 
           <NavLink
-            to="/rents"
+            to="/rent-management"
             className={({ isActive }) =>
               `flex items-center px-4 py-2 mt-2 text-white transition-colors duration-200 ${
                 isActive
@@ -109,8 +111,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, auth }) => {
               }`
             }
           >
-            <FaMoneyBillWave className="h-5 w-5" />
-            <span className="mx-4">Rent</span>
+            <FaFileInvoiceDollar className="h-5 w-5" />
+            <span className="mx-4">Rent Management</span>
           </NavLink>
         </nav>
       </div>

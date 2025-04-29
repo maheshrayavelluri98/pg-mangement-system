@@ -80,42 +80,114 @@ exports.getDashboardStats = asyncHandler(async (req, res, next) => {
       const currentDate = new Date();
       currentDate.setHours(0, 0, 0, 0); // Set to beginning of day
 
-      // Calculate months between join date and current date
-      const monthsDiff =
-        (currentDate.getFullYear() - joinDate.getFullYear()) * 12 +
-        (currentDate.getMonth() - joinDate.getMonth());
+      // Calculate the first due date (one month after joining)
+      const firstDueDate = new Date(joinDate);
+      firstDueDate.setMonth(joinDate.getMonth() + 1);
+      firstDueDate.setHours(0, 0, 0, 0); // Set to beginning of day
 
-      // Calculate the next due date (join date + X months)
-      const nextDueDate = new Date(joinDate);
-      nextDueDate.setMonth(joinDate.getMonth() + monthsDiff + 1);
-      nextDueDate.setHours(0, 0, 0, 0); // Set to beginning of day
+      // Check if the tenant has completed at least one month
+      const hasCompletedOneMonth = currentDate >= firstDueDate;
 
-      // If the due date has already passed, adjust to the current month
-      if (nextDueDate < currentDate) {
-        nextDueDate.setMonth(currentDate.getMonth());
-        nextDueDate.setFullYear(currentDate.getFullYear());
-        // Set the day to match the original join date day
-        nextDueDate.setDate(joinDate.getDate());
+      // Calculate the most recent due date
+      let mostRecentDueDate = new Date(joinDate);
+
+      // Find the most recent due date that has passed
+      while (true) {
+        const nextDate = new Date(mostRecentDueDate);
+        nextDate.setMonth(mostRecentDueDate.getMonth() + 1);
+
+        if (nextDate <= currentDate) {
+          mostRecentDueDate = nextDate;
+        } else {
+          break;
+        }
       }
 
-      // If we're past that day in the current month, move to next month
-      if (nextDueDate < currentDate) {
-        nextDueDate.setMonth(nextDueDate.getMonth() + 1);
-      }
+      // Calculate the next upcoming due date
+      const nextDueDate = new Date(mostRecentDueDate);
+      nextDueDate.setMonth(mostRecentDueDate.getMonth() + 1);
 
       // Check if there's already a rent record for this tenant for the calculated due date month/year
       const tenantRents = tenantRentMap[tenant._id.toString()] || [];
 
-      // Find if there's a rent record for the calculated due date month/year
-      const dueMonth = nextDueDate.getMonth() + 1; // JavaScript months are 0-indexed
-      const dueYear = nextDueDate.getFullYear();
+      // Find if there's a rent record for the next due date month/year
+      const nextDueMonth = nextDueDate.getMonth() + 1; // JavaScript months are 0-indexed
+      const nextDueYear = nextDueDate.getFullYear();
 
-      const existingRentForDueDate = tenantRents.find(
-        (rent) => rent.month === dueMonth && rent.year === dueYear
+      const existingRentForNextDueDate = tenantRents.find(
+        (rent) => rent.month === nextDueMonth && rent.year === nextDueYear
       );
 
-      // If there's no existing rent record for the due date, or it's not paid
-      if (!existingRentForDueDate) {
+      // Find if there's a rent record for the most recent due date month/year
+      const mostRecentDueMonth = mostRecentDueDate.getMonth() + 1; // JavaScript months are 0-indexed
+      const mostRecentDueYear = mostRecentDueDate.getFullYear();
+
+      const existingRentForMostRecentDueDate = tenantRents.find(
+        (rent) =>
+          rent.month === mostRecentDueMonth && rent.year === mostRecentDueYear
+      );
+
+      // Check if tenant has completed one month and has an unpaid rent for the most recent due date
+      if (
+        hasCompletedOneMonth &&
+        (!existingRentForMostRecentDueDate ||
+          !existingRentForMostRecentDueDate.isPaid)
+      ) {
+        // Add to overdue rents if the most recent due date has passed
+        if (mostRecentDueDate <= today) {
+          // If there's no existing rent record, create a placeholder
+          const overdueRent = existingRentForMostRecentDueDate || {
+            tenant: {
+              _id: tenant._id,
+              name: tenant.name,
+              phone: tenant.phone,
+              joiningDate: tenant.joiningDate,
+            },
+            room: {
+              _id: tenant.roomId._id,
+              floorNumber: tenant.roomId.floorNumber,
+              roomNumber: tenant.roomId.roomNumber,
+              rentAmount: tenant.roomId.rentAmount,
+            },
+            dueDate: mostRecentDueDate,
+            amount: tenant.roomId.rentAmount,
+            month: mostRecentDueMonth,
+            year: mostRecentDueYear,
+          };
+
+          // Calculate days past due
+          const daysPastDue = Math.floor(
+            (today - new Date(mostRecentDueDate)) / (1000 * 60 * 60 * 24)
+          );
+
+          // Add to overdue rents
+          overdueRents.push({
+            _id: existingRentForMostRecentDueDate
+              ? existingRentForMostRecentDueDate._id
+              : null,
+            tenant: {
+              _id: tenant._id,
+              name: tenant.name,
+              phone: tenant.phone,
+              joiningDate: tenant.joiningDate,
+            },
+            room: {
+              _id: tenant.roomId._id,
+              floorNumber: tenant.roomId.floorNumber,
+              roomNumber: tenant.roomId.roomNumber,
+              rentAmount: tenant.roomId.rentAmount,
+            },
+            dueDate: mostRecentDueDate,
+            amount: tenant.roomId.rentAmount,
+            month: mostRecentDueMonth,
+            year: mostRecentDueYear,
+            daysPastDue: daysPastDue,
+          });
+        }
+      }
+
+      // Handle the next upcoming due date
+      if (!existingRentForNextDueDate) {
         // This is an upcoming due rent that needs to be created
         if (nextDueDate <= thirtyDaysFromNow && nextDueDate >= today) {
           upcomingDueRents.push({
@@ -133,16 +205,16 @@ exports.getDashboardStats = asyncHandler(async (req, res, next) => {
             },
             dueDate: nextDueDate,
             amount: tenant.roomId.rentAmount,
-            month: dueMonth,
-            year: dueYear,
+            month: nextDueMonth,
+            year: nextDueYear,
           });
         }
-      } else if (!existingRentForDueDate.isPaid) {
+      } else if (!existingRentForNextDueDate.isPaid) {
         // This is an existing rent record that's not paid
-        if (existingRentForDueDate.dueDate < today) {
+        if (existingRentForNextDueDate.dueDate < today) {
           // It's overdue
           overdueRents.push({
-            _id: existingRentForDueDate._id,
+            _id: existingRentForNextDueDate._id,
             tenant: {
               _id: tenant._id,
               name: tenant.name,
@@ -155,19 +227,19 @@ exports.getDashboardStats = asyncHandler(async (req, res, next) => {
               roomNumber: tenant.roomId.roomNumber,
               rentAmount: tenant.roomId.rentAmount,
             },
-            dueDate: existingRentForDueDate.dueDate,
-            amount: existingRentForDueDate.amount,
-            month: existingRentForDueDate.month,
-            year: existingRentForDueDate.year,
+            dueDate: existingRentForNextDueDate.dueDate,
+            amount: existingRentForNextDueDate.amount,
+            month: existingRentForNextDueDate.month,
+            year: existingRentForNextDueDate.year,
             daysPastDue: Math.floor(
-              (today - new Date(existingRentForDueDate.dueDate)) /
+              (today - new Date(existingRentForNextDueDate.dueDate)) /
                 (1000 * 60 * 60 * 24)
             ),
           });
         } else {
           // It's upcoming but already created
           upcomingDueRents.push({
-            _id: existingRentForDueDate._id,
+            _id: existingRentForNextDueDate._id,
             tenant: {
               _id: tenant._id,
               name: tenant.name,
@@ -180,10 +252,10 @@ exports.getDashboardStats = asyncHandler(async (req, res, next) => {
               roomNumber: tenant.roomId.roomNumber,
               rentAmount: tenant.roomId.rentAmount,
             },
-            dueDate: existingRentForDueDate.dueDate,
-            amount: existingRentForDueDate.amount,
-            month: existingRentForDueDate.month,
-            year: existingRentForDueDate.year,
+            dueDate: existingRentForNextDueDate.dueDate,
+            amount: existingRentForNextDueDate.amount,
+            month: existingRentForNextDueDate.month,
+            year: existingRentForNextDueDate.year,
             existingRecord: true,
           });
         }

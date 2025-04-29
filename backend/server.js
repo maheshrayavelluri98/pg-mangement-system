@@ -3,6 +3,11 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/error");
+const {
+  updateRentStatuses,
+  generateMonthlyRents,
+  checkForMissingRentRecords,
+} = require("./utils/rentScheduler");
 
 // Load env vars
 dotenv.config();
@@ -46,6 +51,30 @@ const server = app.listen(
   PORT,
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`)
 );
+
+// Set up scheduled tasks
+// Run rent status update daily at midnight
+const runDailyTasks = () => {
+  const now = new Date();
+  console.log(`Running daily tasks at ${now.toISOString()}`);
+
+  // Update rent statuses (mark as overdue if past due date)
+  updateRentStatuses();
+
+  // Check for missing rent records for tenants who have paid their previous month's rent
+  checkForMissingRentRecords();
+
+  // Check if it's the 25th day of the month to generate next month's rents
+  if (now.getDate() === 25) {
+    generateMonthlyRents();
+  }
+};
+
+// Run immediately on startup
+runDailyTasks();
+
+// Then schedule to run daily
+setInterval(runDailyTasks, 24 * 60 * 60 * 1000); // 24 hours
 
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (err, promise) => {

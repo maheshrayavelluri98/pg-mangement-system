@@ -14,6 +14,7 @@ import Tenants from "./pages/Tenants";
 import TenantForm from "./pages/TenantForm";
 import Rents from "./pages/Rents";
 import RentForm from "./pages/RentForm";
+import RentManagement from "./pages/RentManagement";
 import Profile from "./pages/Profile";
 
 // Components
@@ -207,6 +208,7 @@ function App() {
           <Route path="rents" element={<Rents />} />
           <Route path="rents/add" element={<RentForm />} />
           <Route path="rents/edit/:id" element={<RentForm />} />
+          <Route path="rent-management" element={<RentManagement />} />
           <Route path="profile" element={<Profile auth={authContextValue} />} />
         </Route>
 

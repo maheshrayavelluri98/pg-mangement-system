@@ -5,7 +5,15 @@ import { toast } from "react-toastify";
 const API_URL =
   import.meta.env.VITE_API_URL ||
   "https://pg-management-system-api.onrender.com";
-axios.defaults.baseURL = API_URL;
+
+// Make sure the API URL doesn't have a trailing slash
+const formattedApiUrl = API_URL.endsWith("/") ? API_URL.slice(0, -1) : API_URL;
+axios.defaults.baseURL = formattedApiUrl;
+
+// Debug info
+console.log("API URL:", formattedApiUrl);
+console.log("Environment:", import.meta.env.MODE);
+console.log("Sample full URL:", `${formattedApiUrl}/api/v1/admin/login`);
 
 // Add a request interceptor
 axios.interceptors.request.use(
@@ -31,6 +39,16 @@ axios.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Log detailed error information
+    console.error("API Error:", {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+    });
+
     // Handle 401 Unauthorized errors
     if (error.response && error.response.status === 401) {
       // If not on login or register page, clear token and redirect

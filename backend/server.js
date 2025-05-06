@@ -32,7 +32,11 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? "https://pg-mangement-system.vercel.app"
+        ? [
+            "https://pg-management-system.vercel.app",
+            "https://pg-management-system-git-main.vercel.app",
+            "https://pg-management-system-sebzy.vercel.app",
+          ]
         : "*",
     credentials: true,
   })
@@ -48,6 +52,25 @@ app.use("/api/v1/dashboard", dashboardRoutes);
 // Basic route for testing
 app.get("/", (req, res) => {
   res.send("PG Management System API is running...");
+});
+
+// Debug route
+app.get("/api/v1/debug", (req, res) => {
+  res.json({
+    environment: process.env.NODE_ENV,
+    cors: {
+      origin:
+        process.env.NODE_ENV === "production"
+          ? [
+              "https://pg-management-system.vercel.app",
+              "https://pg-management-system-git-main.vercel.app",
+              "https://pg-management-system-sebzy.vercel.app",
+            ]
+          : "*",
+    },
+    headers: req.headers,
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Error handler middleware

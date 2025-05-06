@@ -32,7 +32,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, auth }) => {
       >
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center">
-            <FaBuilding className="h-8 w-8 text-white mr-3" />
+            {/* <FaBuilding className="h-8 w-8 text-white mr-3" /> */}
+            <image
+              src="/frontend/public/sebzy1.jpg"
+              className="text-2xl font-bold text-white"
+            />
             <div className="flex flex-col">
               <div className="text-2xl font-bold text-white">Sebzy</div>
               <div className="text-sm font-semibold text-blue-200">

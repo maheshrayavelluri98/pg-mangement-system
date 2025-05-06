@@ -35,7 +35,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, auth }) => {
             {/* <FaBuilding className="h-8 w-8 text-white mr-3" /> */}
             <image
               src="/frontend/public/sebzy1.jpg"
-              className="text-2xl font-bold text-white"
+              className="h-8 w-10 bg-white"
             />
             <div className="flex flex-col">
               <div className="text-2xl font-bold text-white">Sebzy</div>

@@ -25,7 +25,7 @@ import PrivateRoute from "./components/PrivateRoute.jsx";
 import { RoomProvider } from "./context/RoomContext";
 
 // Set base URL for API
-axios.defaults.baseURL = "http://localhost:5000/api/v1";
+axios.defaults.baseURL = "https://pg-management-system-api.onrender.com/api/v1";
 
 function App() {
   const [admin, setAdmin] = useState(null);

@@ -3,8 +3,7 @@ import { toast } from "react-toastify";
 
 // Set base URL
 const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "https://pg-management-system-api.onrender.com";
+  import.meta.env.VITE_API_URL || "https://pg-mangement-system-3.onrender.com";
 
 // Make sure the API URL doesn't have a trailing slash
 const formattedApiUrl = API_URL.endsWith("/") ? API_URL.slice(0, -1) : API_URL;

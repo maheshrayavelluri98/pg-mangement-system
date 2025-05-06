@@ -30,17 +30,28 @@ app.use(express.json());
 // Enable CORS
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? [
-            "https://pg-management-system.vercel.app",
-            "https://pg-management-system-git-main.vercel.app",
-            "https://pg-management-system-sebzy.vercel.app",
-          ]
-        : "*",
+    origin: "*", // Allow all origins for now to fix the immediate issue
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// Handle OPTIONS preflight requests manually
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.status(200).send();
+});
+
+// Add CORS headers to all responses
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
 
 // Mount routers
 app.use("/api/v1/admin", adminRoutes);
@@ -59,16 +70,12 @@ app.get("/api/v1/debug", (req, res) => {
   res.json({
     environment: process.env.NODE_ENV,
     cors: {
-      origin:
-        process.env.NODE_ENV === "production"
-          ? [
-              "https://pg-management-system.vercel.app",
-              "https://pg-management-system-git-main.vercel.app",
-              "https://pg-management-system-sebzy.vercel.app",
-            ]
-          : "*",
+      origin: "*",
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
     },
     headers: req.headers,
+    requestOrigin: req.headers.origin || "No origin header",
     timestamp: new Date().toISOString(),
   });
 });

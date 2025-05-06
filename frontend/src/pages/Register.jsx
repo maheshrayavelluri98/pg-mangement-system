@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaUserPlus, FaBuilding } from "react-icons/fa";
+import { FaUserPlus } from "react-icons/fa";
 
 const Register = ({ auth }) => {
   const [formData, setFormData] = useState({
@@ -45,8 +45,12 @@ const Register = ({ auth }) => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="flex justify-center">
-            <FaBuilding className="h-16 w-16 text-white" />
+          <div className="logo-container">
+            <img
+              src="/sebzy1-removebg-preview.png"
+              alt="Sebzy Logo"
+              className="logo-image"
+            />
           </div>
           <h2 className="mt-3 text-center text-3xl font-extrabold text-white">
             <span className="font-bold">Sebzy</span> PG Management

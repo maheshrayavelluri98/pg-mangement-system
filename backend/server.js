@@ -28,7 +28,12 @@ const app = express();
 app.use(express.json());
 
 // Enable CORS
-app.use(cors());
+app.use(cors({
+  origin: "https://pg-mangement-system.vercel.app/",
+  credentials: true
+}
+  
+            ));
 
 // Mount routers
 app.use("/api/v1/admin", adminRoutes);

@@ -30,7 +30,10 @@ app.use(express.json());
 // Enable CORS
 app.use(
   cors({
-    origin: "*",
+    origin:
+      process.env.NODE_ENV === "production"
+        ? "https://pg-mangement-system.vercel.app"
+        : "*",
     credentials: true,
   })
 );

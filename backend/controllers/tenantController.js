@@ -1,5 +1,6 @@
 const Tenant = require("../models/Tenant");
 const Room = require("../models/Room");
+const Rent = require("../models/Rent");
 const ErrorResponse = require("../utils/errorResponse");
 const asyncHandler = require("../middleware/async");
 
@@ -320,9 +321,43 @@ exports.deleteTenant = asyncHandler(async (req, res, next) => {
         tenantCount >= room.capacity
       }`
     );
+
+    // Store tenant and room information before deletion
+    const tenantInfo = {
+      name: tenant.name,
+      phone: tenant.phone,
+      email: tenant.email,
+    };
+
+    const roomInfo = {
+      floorNumber: room.floorNumber,
+      roomNumber: room.roomNumber,
+      rentAmount: room.rentAmount,
+    };
+
+    // Update all rent records associated with this tenant
+    // Instead of deleting them, we'll add tenant and room information
+    // so they can still be displayed properly
+    const rentRecords = await Rent.find({ tenantId: tenant._id });
+
+    console.log(
+      `Found ${rentRecords.length} rent records for tenant ${tenant._id}`
+    );
+
+    for (const rent of rentRecords) {
+      await Rent.findByIdAndUpdate(rent._id, {
+        $set: {
+          tenantInfo: tenantInfo,
+          roomInfo: roomInfo,
+          tenantDeleted: true,
+        },
+      });
+    }
+
+    console.log(`Updated ${rentRecords.length} rent records with tenant info`);
   } catch (err) {
-    console.error("Error updating room occupancy:", err);
-    // Continue with deletion even if room update fails
+    console.error("Error updating room occupancy or rent records:", err);
+    // Continue with deletion even if updates fail
   }
 
   await tenant.deleteOne();

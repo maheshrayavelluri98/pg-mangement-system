@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 
 // Set up axios defaults
-axios.defaults.baseURL = "http://localhost:5000/api/v1";
+axios.defaults.baseURL = "https://pg-mangement-system-3.onrender.com/api/v1";
 axios.defaults.headers.common["Content-Type"] = "application/json";
 
 ReactDOM.createRoot(document.getElementById("root")).render(

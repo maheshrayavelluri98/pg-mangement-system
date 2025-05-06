@@ -333,17 +333,32 @@ const RentManagement = () => {
                   <tr key={rent._id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {rent.tenantId ? rent.tenantId.name : "Unknown Tenant"}
+                        {rent.tenantDeleted && rent.tenantInfo
+                          ? `${rent.tenantInfo.name} (Deleted)`
+                          : rent.tenantId
+                          ? rent.tenantId.name
+                          : "Unknown Tenant"}
                       </div>
-                      {rent.tenantId && rent.tenantId.phone && (
-                        <div className="text-xs text-gray-500">
-                          {rent.tenantId.phone}
-                        </div>
-                      )}
+                      {rent.tenantDeleted &&
+                        rent.tenantInfo &&
+                        rent.tenantInfo.phone && (
+                          <div className="text-xs text-gray-500">
+                            {rent.tenantInfo.phone}
+                          </div>
+                        )}
+                      {!rent.tenantDeleted &&
+                        rent.tenantId &&
+                        rent.tenantId.phone && (
+                          <div className="text-xs text-gray-500">
+                            {rent.tenantId.phone}
+                          </div>
+                        )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {rent.roomId
+                        {rent.tenantDeleted && rent.roomInfo
+                          ? `Floor ${rent.roomInfo.floorNumber}, Room ${rent.roomInfo.roomNumber}`
+                          : rent.roomId
                           ? `Floor ${rent.roomId.floorNumber}, Room ${rent.roomId.roomNumber}`
                           : "Unknown Room"}
                       </div>
@@ -499,7 +514,11 @@ const RentManagement = () => {
             <div className="mb-4">
               <p className="text-sm text-gray-600 mb-1">
                 Tenant:{" "}
-                {selectedRent.tenantId ? selectedRent.tenantId.name : "Unknown"}
+                {selectedRent.tenantDeleted && selectedRent.tenantInfo
+                  ? `${selectedRent.tenantInfo.name} (Deleted)`
+                  : selectedRent.tenantId
+                  ? selectedRent.tenantId.name
+                  : "Unknown"}
               </p>
               <p className="text-sm text-gray-600 mb-1">
                 Period: {getMonthName(selectedRent.month)} {selectedRent.year}

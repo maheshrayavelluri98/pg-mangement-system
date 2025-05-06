@@ -11,6 +11,23 @@ const RentSchema = new mongoose.Schema({
     ref: "Room",
     required: true,
   },
+  // Store tenant information in case tenant is deleted
+  tenantInfo: {
+    name: String,
+    phone: String,
+    email: String,
+  },
+  // Store room information in case room is deleted
+  roomInfo: {
+    floorNumber: Number,
+    roomNumber: Number,
+    rentAmount: Number,
+  },
+  // Flag to indicate if the tenant has been deleted
+  tenantDeleted: {
+    type: Boolean,
+    default: false,
+  },
   adminId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Admin",

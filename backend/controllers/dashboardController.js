@@ -20,6 +20,19 @@ exports.getDashboardStats = asyncHandler(async (req, res, next) => {
     occupiedBeds: { $gt: 0 },
   });
 
+  // Get fully occupied rooms (where occupiedBeds equals capacity)
+  const fullyOccupiedRooms = await Room.countDocuments({
+    adminId,
+    $expr: { $eq: ["$occupiedBeds", "$capacity"] },
+  });
+
+  // Get partially occupied rooms (where occupiedBeds is greater than 0 but less than capacity)
+  const partiallyOccupiedRooms = await Room.countDocuments({
+    adminId,
+    occupiedBeds: { $gt: 0 },
+    $expr: { $lt: ["$occupiedBeds", "$capacity"] },
+  });
+
   // Get total tenants count
   const totalTenants = await Tenant.countDocuments({ adminId });
 
@@ -315,6 +328,8 @@ exports.getDashboardStats = asyncHandler(async (req, res, next) => {
     data: {
       totalRooms,
       occupiedRooms,
+      fullyOccupiedRooms,
+      partiallyOccupiedRooms,
       totalTenants,
       pendingRents,
       upcomingDueRents,

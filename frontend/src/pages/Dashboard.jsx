@@ -15,6 +15,8 @@ const Dashboard = () => {
   const [stats, setStats] = useState({
     totalRooms: 0,
     occupiedRooms: 0,
+    partiallyOccupiedRooms: 0,
+    fullyOccupiedRooms: 0,
     totalTenants: 0,
     pendingRents: 0,
   });
@@ -31,6 +33,8 @@ const Dashboard = () => {
         setStats({
           totalRooms: 0,
           occupiedRooms: 0,
+          partiallyOccupiedRooms: 0,
+          fullyOccupiedRooms: 0,
           totalTenants: 0,
           pendingRents: 0,
         });
@@ -42,6 +46,8 @@ const Dashboard = () => {
       setStats({
         totalRooms: 0,
         occupiedRooms: 0,
+        partiallyOccupiedRooms: 0,
+        fullyOccupiedRooms: 0,
         totalTenants: 0,
         pendingRents: 0,
       });
@@ -105,16 +111,29 @@ const Dashboard = () => {
           </div>
           <div className="mt-4">
             <p className="text-sm text-gray-600">
-              {stats.occupiedRooms} occupied,{" "}
+              {stats.fullyOccupiedRooms} fully occupied,{" "}
+              {stats.partiallyOccupiedRooms} partially occupied,{" "}
               {stats.totalRooms - stats.occupiedRooms} vacant
             </p>
-            <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-              <div
-                className="bg-gradient-to-r from-blue-400 to-blue-600 h-2.5 rounded-full"
-                style={{
-                  width: `${(stats.occupiedRooms / stats.totalRooms) * 100}%`,
-                }}
-              ></div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2 overflow-hidden">
+              <div className="flex h-full">
+                <div
+                  className="bg-gradient-to-r from-blue-600 to-blue-800 h-2.5"
+                  style={{
+                    width: `${
+                      (stats.fullyOccupiedRooms / stats.totalRooms) * 100
+                    }%`,
+                  }}
+                ></div>
+                <div
+                  className="bg-gradient-to-r from-blue-400 to-blue-500 h-2.5"
+                  style={{
+                    width: `${
+                      (stats.partiallyOccupiedRooms / stats.totalRooms) * 100
+                    }%`,
+                  }}
+                ></div>
+              </div>
             </div>
           </div>
         </div>

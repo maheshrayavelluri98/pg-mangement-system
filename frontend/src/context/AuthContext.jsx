@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
           // Get admin data
-          const res = await axios.get("/api/v1/admin/me");
+          const res = await axios.get("/admin/me");
 
           if (res.data.success) {
             setAdmin(res.data.data);
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
 
     try {
-      const res = await axios.post("/api/v1/admin/register", adminData);
+      const res = await axios.post("/admin/register", adminData);
 
       if (res.data.success) {
         localStorage.setItem("token", res.data.token);
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
         ] = `Bearer ${res.data.token}`;
 
         // Get admin data
-        const adminRes = await axios.get("/api/v1/admin/me");
+        const adminRes = await axios.get("/admin/me");
 
         setAdmin(adminRes.data.data);
         setIsAuthenticated(true);

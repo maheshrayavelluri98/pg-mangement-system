@@ -145,12 +145,12 @@ exports.createTenant = asyncHandler(async (req, res, next) => {
     // Update room with accurate count (add 1 for the new tenant)
     await Room.findByIdAndUpdate(room._id, {
       occupiedBeds: tenantCount + 1,
-      isOccupied: tenantCount + 1 >= room.capacity,
+      isOccupied: tenantCount + 1 === room.capacity,
     });
 
     console.log(
       `Room ${room._id} updated: occupiedBeds=${tenantCount + 1}, isOccupied=${
-        tenantCount + 1 >= room.capacity
+        tenantCount + 1 === room.capacity
       }`
     );
   } catch (err) {
@@ -221,14 +221,14 @@ exports.updateTenant = asyncHandler(async (req, res, next) => {
         // Update old room with accurate count
         await Room.findByIdAndUpdate(oldRoom._id, {
           occupiedBeds: oldRoomTenantCount,
-          isOccupied: oldRoomTenantCount >= oldRoom.capacity,
+          isOccupied: oldRoomTenantCount === oldRoom.capacity,
         });
 
         console.log(
           `Old Room ${
             oldRoom._id
           } updated: occupiedBeds=${oldRoomTenantCount}, isOccupied=${
-            oldRoomTenantCount >= oldRoom.capacity
+            oldRoomTenantCount === oldRoom.capacity
           }`
         );
       }
@@ -247,13 +247,13 @@ exports.updateTenant = asyncHandler(async (req, res, next) => {
         // Update new room with accurate count (add 1 for the tenant being moved)
         await Room.findByIdAndUpdate(newRoom._id, {
           occupiedBeds: newRoomTenantCount + 1,
-          isOccupied: newRoomTenantCount + 1 >= newRoom.capacity,
+          isOccupied: newRoomTenantCount + 1 === newRoom.capacity,
         });
 
         console.log(
           `New Room ${newRoom._id} updated: occupiedBeds=${
             newRoomTenantCount + 1
-          }, isOccupied=${newRoomTenantCount + 1 >= newRoom.capacity}`
+          }, isOccupied=${newRoomTenantCount + 1 === newRoom.capacity}`
         );
       }
     } catch (err) {
@@ -313,12 +313,12 @@ exports.deleteTenant = asyncHandler(async (req, res, next) => {
     // Update room with accurate count
     await Room.findByIdAndUpdate(room._id, {
       occupiedBeds: tenantCount,
-      isOccupied: tenantCount >= room.capacity,
+      isOccupied: tenantCount === room.capacity,
     });
 
     console.log(
       `Room ${room._id} updated: occupiedBeds=${tenantCount}, isOccupied=${
-        tenantCount >= room.capacity
+        tenantCount === room.capacity
       }`
     );
 

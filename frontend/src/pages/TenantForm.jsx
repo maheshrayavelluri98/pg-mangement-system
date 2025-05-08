@@ -3,16 +3,19 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { FaSave, FaArrowLeft } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useRooms } from "../context/RoomContext";
 
 const TenantForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const isEditMode = !!id;
+  const { fetchRooms } = useRooms(); // Get fetchRooms from RoomContext
 
   // Get roomId from URL query parameter if available
   const queryParams = new URLSearchParams(location.search);
   const preselectedRoomId = queryParams.get("roomId");
+  const returnToRoom = queryParams.get("returnToRoom") === "true";
 
   const [formData, setFormData] = useState({
     name: "",
@@ -135,10 +138,23 @@ const TenantForm = () => {
       }
 
       if (res.data.success) {
+        // Refresh rooms data to update occupancy status immediately
+        await fetchRooms();
+
         toast.success(
           `Tenant ${isEditMode ? "updated" : "created"} successfully`
         );
-        navigate("/tenants");
+
+        // If we came from a room details page and have a preselected room,
+        // navigate back to that room's details page
+        if (returnToRoom && preselectedRoomId) {
+          // Add a small delay to ensure the room data is refreshed before navigating
+          setTimeout(() => {
+            navigate(`/rooms/details/${preselectedRoomId}`);
+          }, 300);
+        } else {
+          navigate("/tenants");
+        }
       } else {
         toast.error(
           res.data.error ||

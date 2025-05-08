@@ -11,26 +11,43 @@ export const useRooms = () => useContext(RoomContext);
 export const RoomProvider = ({ children }) => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   // Fetch rooms on component mount
   useEffect(() => {
-    fetchRooms();
-  }, []);
+    if (!initialized) {
+      fetchRooms();
+      setInitialized(true);
+    }
+  }, [initialized]);
 
   // Fetch all rooms
   const fetchRooms = async () => {
-    setLoading(true);
+    // Don't set loading to true if we're already initialized and have rooms
+    if (!initialized || rooms.length === 0) {
+      setLoading(true);
+    }
+
     try {
+      console.log("Fetching rooms...");
       const res = await axios.get("/rooms");
+
       if (res.data.success) {
+        console.log(`Fetched ${res.data.data.length} rooms successfully`);
         setRooms(res.data.data);
       } else {
+        console.error("Error in API response:", res.data);
+        toast.error(res.data.error || "Failed to fetch rooms");
         setRooms([]);
       }
-      setLoading(false);
     } catch (err) {
       console.error("Error fetching rooms:", err);
-      toast.error("Failed to fetch rooms");
+      toast.error(
+        err.response?.data?.error ||
+          "Failed to fetch rooms. Please check your connection."
+      );
+      setRooms([]);
+    } finally {
       setLoading(false);
     }
   };
@@ -92,6 +109,7 @@ export const RoomProvider = ({ children }) => {
 
   // Get a single room
   const getRoom = (id) => {
+    if (loading) return null; // Return null if still loading
     return rooms.find((room) => room._id === id);
   };
 
@@ -100,6 +118,7 @@ export const RoomProvider = ({ children }) => {
       value={{
         rooms,
         loading,
+        initialized,
         fetchRooms,
         addRoom,
         updateRoom,

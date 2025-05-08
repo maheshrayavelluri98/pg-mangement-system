@@ -1,18 +1,30 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
+import React, { useEffect, useRef } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   FaTimes,
   FaTachometerAlt,
   FaDoorOpen,
   FaUsers,
-  FaMoneyBillWave,
   FaUserCircle,
-  FaCalendarAlt,
   FaFileInvoiceDollar,
 } from "react-icons/fa";
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen, auth }) => {
   const { admin } = auth;
+  const location = useLocation();
+
+  // Close sidebar on location change (mobile only), but not when sidebar is just opened
+  const prevLocation = useRef(location);
+
+  useEffect(() => {
+    // Only close if the location actually changed and sidebar is open
+    if (sidebarOpen && prevLocation.current.pathname !== location.pathname) {
+      setSidebarOpen(false);
+    }
+
+    // Update the previous location
+    prevLocation.current = location;
+  }, [location, setSidebarOpen, sidebarOpen]);
 
   return (
     <>
@@ -30,7 +42,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, auth }) => {
         }`}
       >
         <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center">
+          <NavLink
+            to="/dashboard"
+            onClick={() => window.innerWidth < 1024 && setSidebarOpen(false)}
+            className="flex items-center"
+          >
             <div className="logo-container mr-3">
               <img
                 src="/sebzy1-removebg-preview.png"
@@ -46,7 +62,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, auth }) => {
                 PG Management
               </div>
             </div>
-          </div>
+          </NavLink>
           <button
             className="text-white focus:outline-none lg:hidden"
             onClick={() => setSidebarOpen(false)}
@@ -56,18 +72,23 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, auth }) => {
         </div>
 
         <div className="px-6 py-4 border-t border-blue-700">
-          <div className="flex items-center">
+          <NavLink
+            to="/profile"
+            onClick={() => window.innerWidth < 1024 && setSidebarOpen(false)}
+            className="flex items-center hover:bg-blue-700 hover:rounded-lg p-2 transition-colors duration-200"
+          >
             <FaUserCircle className="h-10 w-10 text-white" />
             <div className="ml-3">
               <p className="text-sm font-medium text-white">{admin?.name}</p>
               <p className="text-xs text-blue-200">{admin?.pgName}</p>
             </div>
-          </div>
+          </NavLink>
         </div>
 
         <nav className="mt-5 px-3">
           <NavLink
             to="/dashboard"
+            onClick={() => window.innerWidth < 1024 && setSidebarOpen(false)}
             className={({ isActive }) =>
               `flex items-center px-4 py-2 mt-2 text-white transition-colors duration-200 ${
                 isActive
@@ -82,6 +103,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, auth }) => {
 
           <NavLink
             to="/rooms"
+            onClick={() => window.innerWidth < 1024 && setSidebarOpen(false)}
             className={({ isActive }) =>
               `flex items-center px-4 py-2 mt-2 text-white transition-colors duration-200 ${
                 isActive
@@ -96,6 +118,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, auth }) => {
 
           <NavLink
             to="/tenants"
+            onClick={() => window.innerWidth < 1024 && setSidebarOpen(false)}
             className={({ isActive }) =>
               `flex items-center px-4 py-2 mt-2 text-white transition-colors duration-200 ${
                 isActive
@@ -110,6 +133,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, auth }) => {
 
           <NavLink
             to="/rent-management"
+            onClick={() => window.innerWidth < 1024 && setSidebarOpen(false)}
             className={({ isActive }) =>
               `flex items-center px-4 py-2 mt-2 text-white transition-colors duration-200 ${
                 isActive

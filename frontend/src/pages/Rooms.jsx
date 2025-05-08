@@ -1,26 +1,79 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaSearch, FaFilter } from "react-icons/fa";
 import { useRooms } from "../context/RoomContext";
+import RoomCard from "../components/RoomCard";
 
 const Rooms = () => {
   const { rooms, loading, deleteRoom } = useRooms();
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
 
   const handleViewRoom = (roomId) => {
     navigate(`/rooms/details/${roomId}`);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this room?")) {
-      await deleteRoom(id);
-    }
+  // Function to handle clicking on a vacant room
+  const handleVacantRoomClick = (roomId) => {
+    navigate(`/tenants/add?roomId=${roomId}&returnToRoom=true`);
   };
+
+  const handleDelete = async (id) => {
+    await deleteRoom(id);
+  };
+
+  // Filter and search rooms
+  const filteredRooms = rooms.filter((room) => {
+    // Search by floor number or room number
+    const matchesSearch =
+      searchTerm === "" ||
+      `Floor ${room.floorNumber}, Room ${room.roomNumber}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+    // Filter by status
+    const matchesFilter =
+      filterStatus === "all" ||
+      (filterStatus === "vacant" && room.occupiedBeds === 0) ||
+      (filterStatus === "partial" &&
+        room.occupiedBeds > 0 &&
+        room.occupiedBeds < room.capacity) ||
+      (filterStatus === "full" && room.occupiedBeds >= room.capacity);
+
+    return matchesSearch && matchesFilter;
+  });
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="flex flex-col justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+        <p className="text-gray-600">Loading rooms...</p>
+      </div>
+    );
+  }
+
+  if (!loading && rooms.length === 0) {
+    return (
+      <div>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-semibold text-gray-800">Rooms</h1>
+          <Link to="/rooms/add" className="btn btn-primary flex items-center">
+            <FaPlus className="mr-2" /> Add Room
+          </Link>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <p className="text-gray-600 mb-4">
+            No rooms found. Add your first room to get started.
+          </p>
+          <Link
+            to="/rooms/add"
+            className="btn btn-primary inline-flex items-center"
+          >
+            <FaPlus className="mr-2" /> Add Your First Room
+          </Link>
+        </div>
       </div>
     );
   }
@@ -34,118 +87,61 @@ const Rooms = () => {
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Room
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Capacity
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Rent
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Status
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Amenities
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {rooms.map((room) => (
-                <tr key={room._id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => handleViewRoom(room._id)}
-                      className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-                      title="Click to view room details"
-                    >
-                      Floor {room.floorNumber}, Room {room.roomNumber}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {room.capacity} {room.capacity > 1 ? "persons" : "person"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      ₹{room.rentAmount}/month
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => handleViewRoom(room._id)}
-                      className={`px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full shadow-sm ${
-                        room.occupiedBeds === 0
-                          ? "bg-gradient-to-r from-green-400 to-green-500 text-white hover:from-green-500 hover:to-green-600"
-                          : room.occupiedBeds < room.capacity
-                          ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:from-yellow-500 hover:to-orange-600"
-                          : "bg-gradient-to-r from-red-400 to-red-500 text-white hover:from-red-500 hover:to-red-600"
-                      } cursor-pointer transition-all duration-200 transform hover:scale-105`}
-                      title="Click to view room details and bed layout"
-                    >
-                      {room.occupiedBeds}/{room.capacity}{" "}
-                      {room.occupiedBeds >= room.capacity
-                        ? "(Full)"
-                        : room.occupiedBeds > 0
-                        ? "(Partially Occupied)"
-                        : "(Vacant)"}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {room.amenities.join(", ")}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                    <div className="flex justify-center space-x-3">
-                      <Link
-                        to={`/rooms/edit/${room._id}`}
-                        className="flex items-center px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                      >
-                        <FaEdit className="mr-1" /> Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(room._id)}
-                        className="flex items-center px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                      >
-                        <FaTrash className="mr-1" /> Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Search and Filter Controls */}
+      <div className="bg-white rounded-lg shadow-sm p-4 mb-6 flex flex-wrap gap-4">
+        <div className="flex-1 min-w-[200px]">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search rooms..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <FaSearch className="absolute left-3 top-3 text-gray-400" />
+          </div>
+        </div>
+
+        <div className="flex space-x-2">
+          <div className="flex items-center space-x-2">
+            <FaFilter className="text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">Filter:</span>
+          </div>
+
+          <select
+            className="rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="all">All Rooms</option>
+            <option value="vacant">Vacant</option>
+            <option value="partial">Partially Occupied</option>
+            <option value="full">Full</option>
+          </select>
         </div>
       </div>
+
+      {/* Room Cards Grid */}
+      <div className="room-cards-container">
+        {filteredRooms.map((room) => (
+          <RoomCard
+            key={room._id}
+            room={room}
+            onDelete={handleDelete}
+            onViewRoom={handleViewRoom}
+            onVacantRoomClick={handleVacantRoomClick}
+          />
+        ))}
+      </div>
+
+      {/* Show message when no rooms match filters */}
+      {filteredRooms.length === 0 && !loading && (
+        <div className="bg-white rounded-lg shadow-md p-8 text-center mt-6">
+          <p className="text-gray-600">
+            No rooms match your search criteria. Try adjusting your filters.
+          </p>
+        </div>
+      )}
     </div>
   );
 };

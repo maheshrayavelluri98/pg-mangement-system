@@ -162,68 +162,71 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Routes>
-        {/* Public Routes */}
-        <Route
-          path="/login"
-          element={
-            !isAuthenticated ? (
-              <Login auth={authContextValue} />
-            ) : (
-              <Navigate to="/dashboard" />
-            )
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            !isAuthenticated ? (
-              <Register auth={authContextValue} />
-            ) : (
-              <Navigate to="/dashboard" />
-            )
-          }
-        />
+      <RoomProvider>
+        <Routes>
+          {/* Public Routes */}
+          <Route
+            path="/login"
+            element={
+              !isAuthenticated ? (
+                <Login auth={authContextValue} />
+              ) : (
+                <Navigate to="/dashboard" />
+              )
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              !isAuthenticated ? (
+                <Register auth={authContextValue} />
+              ) : (
+                <Navigate to="/dashboard" />
+              )
+            }
+          />
 
-        {/* Protected Routes */}
-        <Route
-          path="/"
-          element={
-            <PrivateRoute isAuthenticated={isAuthenticated}>
-              <RoomProvider>
+          {/* Protected Routes */}
+          <Route
+            path="/"
+            element={
+              <PrivateRoute isAuthenticated={isAuthenticated}>
                 <Layout auth={authContextValue} />
-              </RoomProvider>
-            </PrivateRoute>
-          }
-        >
-          <Route index element={<Navigate to="/dashboard" />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="rooms" element={<Rooms />} />
-          <Route path="rooms/add" element={<RoomForm />} />
-          <Route path="rooms/edit/:id" element={<RoomForm />} />
-          <Route path="rooms/details/:id" element={<RoomDetails />} />
-          <Route path="tenants" element={<Tenants />} />
-          <Route path="tenants/add" element={<TenantForm />} />
-          <Route path="tenants/edit/:id" element={<TenantForm />} />
-          <Route path="rents" element={<Rents />} />
-          <Route path="rents/add" element={<RentForm />} />
-          <Route path="rents/edit/:id" element={<RentForm />} />
-          <Route path="rent-management" element={<RentManagement />} />
-          <Route path="profile" element={<Profile auth={authContextValue} />} />
-        </Route>
+              </PrivateRoute>
+            }
+          >
+            <Route index element={<Navigate to="/dashboard" />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="rooms" element={<Rooms />} />
+            <Route path="rooms/add" element={<RoomForm />} />
+            <Route path="rooms/edit/:id" element={<RoomForm />} />
+            <Route path="rooms/details/:id" element={<RoomDetails />} />
+            <Route path="tenants" element={<Tenants />} />
+            <Route path="tenants/add" element={<TenantForm />} />
+            <Route path="tenants/edit/:id" element={<TenantForm />} />
+            <Route path="rents" element={<Rents />} />
+            <Route path="rents/add" element={<RentForm />} />
+            <Route path="rents/edit/:id" element={<RentForm />} />
+            <Route path="rent-management" element={<RentManagement />} />
+            <Route
+              path="profile"
+              element={<Profile auth={authContextValue} />}
+            />
+          </Route>
 
-        {/* Catch all - redirect to dashboard if logged in, otherwise to login */}
-        <Route
-          path="*"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/dashboard" />
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-      </Routes>
+          {/* Catch all - redirect to dashboard if logged in, otherwise to login */}
+          <Route
+            path="*"
+            element={
+              isAuthenticated ? (
+                <Navigate to="/dashboard" />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+        </Routes>
+      </RoomProvider>
     </div>
   );
 }

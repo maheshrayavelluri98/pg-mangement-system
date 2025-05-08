@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   FaArrowLeft,
@@ -10,84 +10,118 @@ import {
 } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useRooms } from "../context/RoomContext";
 
 const RoomDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { fetchRooms } = useRooms(); // Get fetchRooms from RoomContext
   const [room, setRoom] = useState(null);
   const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchRoomDetails = async () => {
-      try {
-        // Fetch room details
-        const roomRes = await axios.get(`/rooms/${id}`);
-        if (roomRes.data.success) {
-          setRoom(roomRes.data.data);
-        } else {
-          toast.error("Failed to fetch room details");
-          navigate("/rooms");
-        }
+  // Function to fetch room details and tenants
+  const fetchRoomDetails = async () => {
+    try {
+      setLoading(true);
+      console.log("Fetching room details for ID:", id);
 
-        // Fetch tenants for this room
-        const tenantsRes = await axios.get(`/tenants?roomId=${id}`);
-        if (tenantsRes.data.success) {
-          setTenants(tenantsRes.data.data);
-        } else {
-          setTenants([]);
-        }
+      // Fetch room details and tenants in parallel for better performance
+      const [roomRes, tenantsRes] = await Promise.all([
+        axios.get(`/rooms/${id}`),
+        axios.get(`/tenants?roomId=${id}`),
+      ]);
 
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching room details:", err);
-        toast.error(
-          err.response?.data?.error || "Failed to fetch room details"
-        );
+      // Process room data
+      if (roomRes.data.success) {
+        console.log("Room data fetched successfully");
+        setRoom(roomRes.data.data);
+      } else {
+        console.error("Failed to fetch room details:", roomRes.data);
+        toast.error("Failed to fetch room details");
         navigate("/rooms");
+        return; // Exit early if room fetch fails
       }
-    };
 
-    fetchRoomDetails();
-  }, [id, navigate]);
+      // Process tenants data
+      if (tenantsRes.data.success) {
+        console.log(
+          `Fetched ${tenantsRes.data.data.length} tenants for this room`
+        );
+        setTenants(tenantsRes.data.data);
+      } else {
+        console.warn("No tenants found or error fetching tenants");
+        setTenants([]);
+      }
+
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching room details:", err);
+      toast.error(err.response?.data?.error || "Failed to fetch room details");
+      setLoading(false);
+      navigate("/rooms");
+    }
+  };
+
+  // Fetch room details when component mounts or when room ID changes
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    // Skip the first render if not already mounted
+    if (!isMounted.current) {
+      isMounted.current = true;
+      fetchRoomDetails();
+    } else if (id) {
+      // Only fetch again if the ID changes
+      fetchRoomDetails();
+    }
+
+    // Cleanup function
+    return () => {
+      // Reset the mounted ref when component unmounts
+      isMounted.current = false;
+    };
+  }, [id]); // Only depend on the ID
 
   const handleAddTenant = () => {
-    navigate(`/tenants/add?roomId=${id}`);
+    navigate(`/tenants/add?roomId=${id}&returnToRoom=true`);
   };
 
   const handleDeleteTenant = async (tenantId) => {
     if (window.confirm("Are you sure you want to delete this tenant?")) {
       try {
+        setLoading(true);
         const res = await axios.delete(`/tenants/${tenantId}`);
+
         if (res.data.success) {
-          // Update local state
-          setTenants(tenants.filter((tenant) => tenant._id !== tenantId));
           toast.success("Tenant deleted successfully");
 
-          // Refresh room details
-          const roomRes = await axios.get(`/rooms/${id}`);
-          if (roomRes.data.success) {
-            setRoom(roomRes.data.data);
-          }
+          // Update local state instead of re-fetching everything
+          // Remove the deleted tenant from the tenants array
+          setTenants(tenants.filter((tenant) => tenant._id !== tenantId));
 
-          // Refresh rooms data in context to update occupiedBeds count
-          fetchRooms();
+          // Update the room's occupiedBeds count
+          if (room) {
+            setRoom({
+              ...room,
+              occupiedBeds: Math.max(0, room.occupiedBeds - 1),
+            });
+          }
         } else {
           toast.error(res.data.error || "Failed to delete tenant");
         }
       } catch (err) {
         console.error("Error deleting tenant:", err);
         toast.error(err.response?.data?.error || "Failed to delete tenant");
+      } finally {
+        setLoading(false);
       }
     }
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="flex flex-col justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+        <p className="text-gray-600">Loading room details...</p>
       </div>
     );
   }

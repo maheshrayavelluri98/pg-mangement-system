@@ -213,11 +213,14 @@ exports.fixRoomOccupancy = asyncHandler(async (req, res, next) => {
       active: true,
     });
 
-    // If the counts don't match, update the room
-    if (room.occupiedBeds !== tenantCount) {
+    // If the counts don't match or isOccupied flag is incorrect, update the room
+    if (
+      room.occupiedBeds !== tenantCount ||
+      room.isOccupied !== (tenantCount === room.capacity)
+    ) {
       await Room.findByIdAndUpdate(room._id, {
         occupiedBeds: tenantCount,
-        isOccupied: tenantCount >= room.capacity,
+        isOccupied: tenantCount === room.capacity,
       });
 
       fixedCount++;

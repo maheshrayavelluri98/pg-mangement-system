@@ -10,7 +10,9 @@ import {
   FaPlus,
   FaSync,
   FaExclamationTriangle,
+  FaSearch,
 } from "react-icons/fa";
+import RentCard from "../components/RentCard";
 
 const RentManagement = () => {
   const [loading, setLoading] = useState(true);
@@ -19,6 +21,7 @@ const RentManagement = () => {
   const [allRents, setAllRents] = useState([]);
   const [activeTab, setActiveTab] = useState("overdue");
   const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedRent, setSelectedRent] = useState(null);
   const [paymentDetails, setPaymentDetails] = useState({
@@ -158,36 +161,73 @@ const RentManagement = () => {
     setShowPaymentModal(true);
   };
 
-  // Filter rents based on status
+  // Filter rents based on status and search term
   const getFilteredRents = () => {
+    let filteredRents = [];
+
+    // First, filter by tab
     if (activeTab === "overdue") {
-      return overdueRents;
+      filteredRents = overdueRents;
     } else if (activeTab === "records") {
       // Show all rent records sorted by date (most recent first)
-      return [...allRents].sort(
+      filteredRents = [...allRents].sort(
         (a, b) => new Date(b.dueDate) - new Date(a.dueDate)
       );
     } else {
       // Filter all rents based on selected filter
       if (filter === "all") {
-        return allRents;
+        filteredRents = allRents;
       } else if (filter === "paid") {
-        return allRents.filter((rent) => rent.isPaid);
+        filteredRents = allRents.filter((rent) => rent.isPaid);
       } else if (filter === "pending") {
-        return allRents.filter(
+        filteredRents = allRents.filter(
           (rent) => !rent.isPaid && rent.status === "Pending"
         );
       } else if (filter === "partial") {
-        return allRents.filter(
+        filteredRents = allRents.filter(
           (rent) => !rent.isPaid && rent.status === "Partially Paid"
         );
       } else if (filter === "overdue") {
-        return allRents.filter(
+        filteredRents = allRents.filter(
           (rent) => !rent.isPaid && rent.status === "Overdue"
         );
+      } else {
+        filteredRents = allRents;
       }
-      return allRents;
     }
+
+    // Then, filter by search term if provided
+    if (searchTerm.trim() !== "") {
+      const term = searchTerm.toLowerCase();
+      filteredRents = filteredRents.filter((rent) => {
+        // Search by tenant name
+        const tenantName =
+          rent.tenantDeleted && rent.tenantInfo
+            ? rent.tenantInfo.name
+            : rent.tenantId
+            ? rent.tenantId.name
+            : "";
+
+        // Search by room number
+        const roomDetails =
+          rent.tenantDeleted && rent.roomInfo
+            ? `Floor ${rent.roomInfo.floorNumber}, Room ${rent.roomInfo.roomNumber}`
+            : rent.roomId
+            ? `Floor ${rent.roomId.floorNumber}, Room ${rent.roomId.roomNumber}`
+            : "";
+
+        // Search by month/year
+        const monthYear = `${getMonthName(rent.month)} ${rent.year}`;
+
+        return (
+          tenantName.toLowerCase().includes(term) ||
+          roomDetails.toLowerCase().includes(term) ||
+          monthYear.toLowerCase().includes(term)
+        );
+      });
+    }
+
+    return filteredRents;
   };
 
   // Load data on component mount
@@ -197,8 +237,9 @@ const RentManagement = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="flex flex-col justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+        <p className="text-gray-600">Loading rent data...</p>
       </div>
     );
   }
@@ -212,43 +253,19 @@ const RentManagement = () => {
         </p>
       </div>
 
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex space-x-2">
-          <button
-            onClick={() => setActiveTab("overdue")}
-            className={`px-4 py-2 rounded-lg flex items-center ${
-              activeTab === "overdue"
-                ? "bg-red-500 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            <FaClock className="mr-2" /> Overdue
-            {overdueRents.length > 0 && (
-              <span className="ml-2 bg-white text-red-500 rounded-full w-6 h-6 flex items-center justify-center text-xs">
-                {overdueRents.length}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab("records")}
-            className={`px-4 py-2 rounded-lg flex items-center ${
-              activeTab === "records"
-                ? "bg-blue-500 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            <FaMoneyBillWave className="mr-2" /> Rent Records
-          </button>
-          <button
-            onClick={() => setActiveTab("all")}
-            className={`px-4 py-2 rounded-lg flex items-center ${
-              activeTab === "all"
-                ? "bg-purple-500 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            <FaFilter className="mr-2" /> All Rents
-          </button>
+      {/* Search and Filter Controls */}
+      <div className="bg-white rounded-lg shadow-sm p-4 mb-6 flex flex-wrap gap-4">
+        <div className="flex-1 min-w-[200px]">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by tenant, room, or month..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <FaSearch className="absolute left-3 top-3 text-gray-400" />
+          </div>
         </div>
 
         <div className="flex space-x-2">
@@ -270,20 +287,92 @@ const RentManagement = () => {
         </div>
       </div>
 
+      {/* Filter Tabs */}
+      <div className="rent-filter-container mb-6">
+        <button
+          onClick={() => setActiveTab("overdue")}
+          className={`rent-filter-btn ${
+            activeTab === "overdue" ? "active" : ""
+          }`}
+        >
+          <FaClock className="rent-filter-btn-icon" />
+          Overdue
+          {overdueRents.length > 0 && (
+            <span className="rent-filter-badge">{overdueRents.length}</span>
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab("records")}
+          className={`rent-filter-btn ${
+            activeTab === "records" ? "active" : ""
+          }`}
+        >
+          <FaMoneyBillWave className="rent-filter-btn-icon" />
+          Rent Records
+        </button>
+        <button
+          onClick={() => setActiveTab("all")}
+          className={`rent-filter-btn ${activeTab === "all" ? "active" : ""}`}
+        >
+          <FaFilter className="rent-filter-btn-icon" />
+          All Rents
+        </button>
+      </div>
+
       {activeTab === "all" && (
-        <div className="mb-4 flex items-center">
-          <span className="mr-2 text-gray-700">Filter:</span>
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">All Rents</option>
-            <option value="paid">Paid</option>
-            <option value="pending">Pending</option>
-            <option value="partial">Partially Paid</option>
-            <option value="overdue">Overdue</option>
-          </select>
+        <div className="mb-4 bg-white rounded-lg shadow-sm p-4">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setFilter("all")}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                filter === "all"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              All Rents
+            </button>
+            <button
+              onClick={() => setFilter("paid")}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                filter === "paid"
+                  ? "bg-green-500 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              Paid
+            </button>
+            <button
+              onClick={() => setFilter("pending")}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                filter === "pending"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              Pending
+            </button>
+            <button
+              onClick={() => setFilter("partial")}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                filter === "partial"
+                  ? "bg-orange-500 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              Partially Paid
+            </button>
+            <button
+              onClick={() => setFilter("overdue")}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                filter === "overdue"
+                  ? "bg-red-500 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              Overdue
+            </button>
+          </div>
         </div>
       )}
 
@@ -299,171 +388,32 @@ const RentManagement = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tenant
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Room
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Period
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Due Date
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {getFilteredRents().length > 0 ? (
-                getFilteredRents().map((rent) => (
-                  <tr key={rent._id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {rent.tenantDeleted && rent.tenantInfo
-                          ? `${rent.tenantInfo.name} (Deleted)`
-                          : rent.tenantId
-                          ? rent.tenantId.name
-                          : "Unknown Tenant"}
-                      </div>
-                      {rent.tenantDeleted &&
-                        rent.tenantInfo &&
-                        rent.tenantInfo.phone && (
-                          <div className="text-xs text-gray-500">
-                            {rent.tenantInfo.phone}
-                          </div>
-                        )}
-                      {!rent.tenantDeleted &&
-                        rent.tenantId &&
-                        rent.tenantId.phone && (
-                          <div className="text-xs text-gray-500">
-                            {rent.tenantId.phone}
-                          </div>
-                        )}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {rent.tenantDeleted && rent.roomInfo
-                          ? `Floor ${rent.roomInfo.floorNumber}, Room ${rent.roomInfo.roomNumber}`
-                          : rent.roomId
-                          ? `Floor ${rent.roomId.floorNumber}, Room ${rent.roomId.roomNumber}`
-                          : "Unknown Room"}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {getMonthName(rent.month)} {rent.year}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {new Date(rent.dueDate).toLocaleDateString()}
-                      </div>
-                      {activeTab === "overdue" && rent.daysOverdue && (
-                        <div className="text-xs font-medium text-red-600">
-                          {rent.daysOverdue} days overdue
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        ₹{rent.amount}
-                      </div>
-                      {rent.amountPaid > 0 && rent.amountPaid < rent.amount && (
-                        <div className="text-xs text-gray-500">
-                          Paid: ₹{rent.amountPaid} | Due: ₹
-                          {rent.amount - rent.amountPaid}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span
-                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          rent.isPaid
-                            ? "bg-green-100 text-green-800"
-                            : rent.status === "Overdue"
-                            ? "bg-red-100 text-red-800"
-                            : rent.status === "Partially Paid"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-blue-100 text-blue-800"
-                        }`}
-                      >
-                        {rent.isPaid ? "Paid" : rent.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-center">
-                      <div className="flex justify-center space-x-2">
-                        {rent.needsRecord ? (
-                          <button
-                            onClick={() =>
-                              createRentRecords([
-                                {
-                                  tenantId: rent.tenantId._id,
-                                  amount: rent.amount,
-                                  month: rent.month,
-                                  year: rent.year,
-                                  dueDate: rent.dueDate,
-                                },
-                              ])
-                            }
-                            className="flex items-center px-2 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs rounded hover:from-blue-600 hover:to-blue-700 transition-colors"
-                            disabled={processingRent}
-                          >
-                            <FaPlus className="mr-1" /> Create Record
-                          </button>
-                        ) : (
-                          !rent.isPaid && (
-                            <button
-                              onClick={() => openPaymentModal(rent)}
-                              className="flex items-center px-2 py-1 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs rounded hover:from-green-600 hover:to-green-700 transition-colors"
-                              disabled={processingRent}
-                            >
-                              <FaCheck className="mr-1" /> Pay
-                            </button>
-                          )
-                        )}
-                        {rent._id ? (
-                          <Link
-                            to={`/rents/edit/${rent._id}`}
-                            className="flex items-center px-2 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs rounded hover:from-blue-600 hover:to-blue-700 transition-colors"
-                          >
-                            Details
-                          </Link>
-                        ) : null}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="7"
-                    className="px-4 py-8 text-center text-gray-500"
-                  >
-                    {activeTab === "upcoming"
-                      ? "No upcoming rent dues."
-                      : activeTab === "overdue"
-                      ? "No overdue rents."
-                      : "No rent records found."}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      {/* Rent Cards Grid */}
+      <div className="rent-cards-container">
+        {getFilteredRents().length > 0 ? (
+          getFilteredRents().map((rent) => (
+            <RentCard
+              key={
+                rent._id || `${rent.tenantId?._id}-${rent.month}-${rent.year}`
+              }
+              rent={rent}
+              onPayClick={openPaymentModal}
+              processingRent={processingRent}
+            />
+          ))
+        ) : (
+          <div className="col-span-full bg-white rounded-lg shadow-md p-8 text-center">
+            <p className="text-gray-500">
+              {activeTab === "overdue"
+                ? "No overdue rents."
+                : activeTab === "records"
+                ? "No rent records found."
+                : searchTerm
+                ? "No rents match your search criteria."
+                : "No rent records found."}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Bulk Create Rent Records Section */}

@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaPlus, FaEdit, FaTrash, FaPhone, FaEnvelope } from "react-icons/fa";
+import { FaPlus, FaSearch, FaFilter } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useRooms } from "../context/RoomContext";
+import TenantCard from "../components/TenantCard";
 
 const Tenants = () => {
   const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
   const { fetchRooms } = useRooms(); // Get fetchRooms from RoomContext
 
   useEffect(() => {
@@ -51,10 +54,30 @@ const Tenants = () => {
     }
   };
 
+  // Filter and search tenants
+  const filteredTenants = tenants.filter((tenant) => {
+    // Search by name, phone, or email
+    const matchesSearch =
+      searchTerm === "" ||
+      tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tenant.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (tenant.email &&
+        tenant.email.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    // Filter by status
+    const matchesFilter =
+      filterStatus === "all" ||
+      (filterStatus === "active" && tenant.active) ||
+      (filterStatus === "inactive" && !tenant.active);
+
+    return matchesSearch && matchesFilter;
+  });
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="flex flex-col justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+        <p className="text-gray-600">Loading tenants...</p>
       </div>
     );
   }
@@ -68,113 +91,68 @@ const Tenants = () => {
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Name
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Contact
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Room
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Joining Date
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Status
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {tenants.map((tenant) => (
-                <tr key={tenant._id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {tenant.name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex flex-col text-sm text-gray-900">
-                      <div className="flex items-center">
-                        <FaPhone className="text-gray-400 mr-1" size={12} />
-                        {tenant.phone}
-                      </div>
-                      <div className="flex items-center mt-1">
-                        <FaEnvelope className="text-gray-400 mr-1" size={12} />
-                        {tenant.email}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      Floor {tenant.roomId.floorNumber}, Room{" "}
-                      {tenant.roomId.roomNumber}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {new Date(tenant.joiningDate).toLocaleDateString()}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        tenant.active
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {tenant.active ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                    <div className="flex justify-center space-x-3">
-                      <Link
-                        to={`/tenants/edit/${tenant._id}`}
-                        className="flex items-center px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                      >
-                        <FaEdit className="mr-1" /> Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(tenant._id)}
-                        className="flex items-center px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                      >
-                        <FaTrash className="mr-1" /> Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Search and Filter Controls */}
+      <div className="bg-white rounded-lg shadow-sm p-4 mb-6 flex flex-wrap gap-4">
+        <div className="flex-1 min-w-[200px]">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by name, phone or email..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <FaSearch className="absolute left-3 top-3 text-gray-400" />
+          </div>
+        </div>
+
+        <div className="flex space-x-2">
+          <div className="flex items-center space-x-2">
+            <FaFilter className="text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">Status:</span>
+          </div>
+
+          <select
+            className="rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="all">All Tenants</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
         </div>
       </div>
+
+      {/* Tenant Cards Grid */}
+      <div className="tenant-cards-container">
+        {filteredTenants.map((tenant) => (
+          <TenantCard
+            key={tenant._id}
+            tenant={tenant}
+            onDelete={handleDelete}
+          />
+        ))}
+      </div>
+
+      {/* Show message when no tenants match filters */}
+      {filteredTenants.length === 0 && !loading && (
+        <div className="bg-white rounded-lg shadow-md p-8 text-center mt-6">
+          <p className="text-gray-600">
+            {tenants.length === 0
+              ? "No tenants found. Add your first tenant to get started."
+              : "No tenants match your search criteria. Try adjusting your filters."}
+          </p>
+          {tenants.length === 0 && (
+            <Link
+              to="/tenants/add"
+              className="btn btn-primary inline-flex items-center mt-4"
+            >
+              <FaPlus className="mr-2" /> Add Your First Tenant
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   );
 };

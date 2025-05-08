@@ -2,12 +2,20 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaSave, FaArrowLeft } from "react-icons/fa";
 import { useRooms } from "../context/RoomContext";
+import AmenitiesSelector from "../components/AmenitiesSelector";
 
 const RoomForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = !!id;
-  const { getRoom, addRoom, updateRoom } = useRooms();
+  const {
+    getRoom,
+    addRoom,
+    updateRoom,
+    loading: roomsLoading,
+    initialized,
+    fetchRooms,
+  } = useRooms();
 
   const [formData, setFormData] = useState({
     floorNumber: "",
@@ -29,50 +37,56 @@ const RoomForm = () => {
     description,
   } = formData;
 
-  // Available amenities options
-  const amenitiesOptions = [
-    "AC",
-    "TV",
-    "WiFi",
-    "Geyser",
-    "Refrigerator",
-    "Washing Machine",
-    "Cupboard",
-    "Study Table",
-    "Balcony",
-  ];
+  // Amenities are now handled by the AmenitiesSelector component
 
+  // Fetch rooms data if needed
   useEffect(() => {
-    if (isEditMode) {
-      const room = getRoom(id);
-      if (room) {
-        setFormData({
-          floorNumber: room.floorNumber,
-          roomNumber: room.roomNumber,
-          capacity: room.capacity,
-          rentAmount: room.rentAmount,
-          amenities: room.amenities || [],
-          description: room.description || "",
-        });
-      }
+    // If we're in add mode, no need to fetch
+    if (!isEditMode) {
       setFetchLoading(false);
+      return;
     }
-  }, [id, isEditMode, getRoom]);
+
+    // If rooms are not initialized yet, wait
+    if (!initialized) {
+      return;
+    }
+
+    // If rooms are still loading, wait
+    if (roomsLoading) {
+      return;
+    }
+
+    // If we're in edit mode and rooms are loaded, get the room data
+    const room = getRoom(id);
+    if (room) {
+      console.log("Room found in context:", room);
+      setFormData({
+        floorNumber: room.floorNumber,
+        roomNumber: room.roomNumber,
+        capacity: room.capacity,
+        rentAmount: room.rentAmount,
+        amenities: room.amenities || [],
+        description: room.description || "",
+      });
+      setFetchLoading(false);
+    } else {
+      console.log("Room not found in context, fetching rooms...");
+      // If room not found in context, try to fetch rooms again
+      // But only if we're already initialized to prevent infinite loops
+      if (initialized) {
+        fetchRooms();
+      }
+    }
+  }, [id, isEditMode, getRoom, roomsLoading, fetchRooms, initialized]);
 
   const onChange = (e) => {
-    if (e.target.name === "amenities") {
-      const value = e.target.value;
-      if (e.target.checked) {
-        setFormData({ ...formData, amenities: [...amenities, value] });
-      } else {
-        setFormData({
-          ...formData,
-          amenities: amenities.filter((amenity) => amenity !== value),
-        });
-      }
-    } else {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
-    }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Handle amenities changes from the AmenitiesSelector component
+  const handleAmenitiesChange = (selectedAmenities) => {
+    setFormData({ ...formData, amenities: selectedAmenities });
   };
 
   const onSubmit = async (e) => {
@@ -93,10 +107,11 @@ const RoomForm = () => {
     }
   };
 
-  if (fetchLoading) {
+  if (fetchLoading || roomsLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="flex flex-col justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+        <p className="text-gray-600">Loading room data...</p>
       </div>
     );
   }
@@ -198,27 +213,10 @@ const RoomForm = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Amenities
             </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {amenitiesOptions.map((option) => (
-                <div key={option} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={`amenity-${option}`}
-                    name="amenities"
-                    value={option}
-                    checked={amenities.includes(option)}
-                    onChange={onChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label
-                    htmlFor={`amenity-${option}`}
-                    className="ml-2 block text-sm text-gray-700"
-                  >
-                    {option}
-                  </label>
-                </div>
-              ))}
-            </div>
+            <AmenitiesSelector
+              selectedAmenities={amenities}
+              onChange={handleAmenitiesChange}
+            />
           </div>
 
           <div className="mt-6">

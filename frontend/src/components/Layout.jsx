@@ -32,13 +32,22 @@ const Layout = ({ auth }) => {
   }, [sidebarOpen]);
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <Sidebar
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        auth={auth}
-      />
+    <div className="flex h-screen bg-gray-50 overflow-hidden w-full p-0 m-0">
+      {/* Sidebar - Fixed position on mobile, static on desktop */}
+      <aside
+        className={`responsive-sidebar ${sidebarOpen ? "open" : ""}`}
+        style={{
+          margin: 0,
+          padding: 0,
+          left: 0,
+        }}
+      >
+        <Sidebar
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          auth={auth}
+        />
+      </aside>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -48,8 +57,10 @@ const Layout = ({ auth }) => {
           auth={auth}
         />
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
-          <Outlet />
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 responsive-p">
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

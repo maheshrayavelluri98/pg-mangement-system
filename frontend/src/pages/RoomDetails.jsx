@@ -7,6 +7,19 @@ import {
   FaBed,
   FaTrash,
   FaEdit,
+  FaInfoCircle,
+  FaBuilding,
+  FaRupeeSign,
+  FaUsers,
+  FaLayerGroup,
+  FaListUl,
+  FaCalendarAlt,
+  FaEnvelope,
+  FaPhone,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaExclamationCircle,
+  FaEye,
 } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -119,21 +132,23 @@ const RoomDetails = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-        <p className="text-gray-600">Loading room details...</p>
+      <div className="premium-loading">
+        <div className="premium-spinner"></div>
+        <p className="premium-loading-text">Loading room details...</p>
       </div>
     );
   }
 
   if (!room) {
     return (
-      <div className="text-center py-10">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-          Room not found
-        </h2>
-        <Link to="/rooms" className="btn btn-primary">
-          Back to Rooms
+      <div className="premium-not-found">
+        <FaExclamationCircle size={48} className="text-gray-400 mb-4" />
+        <h2 className="premium-not-found-title">Room not found</h2>
+        <Link
+          to="/rooms"
+          className="premium-action-btn premium-action-btn-primary"
+        >
+          <FaArrowLeft className="premium-action-btn-icon" /> Back to Rooms
         </Link>
       </div>
     );
@@ -147,226 +162,321 @@ const RoomDetails = () => {
   });
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">
+    <div className="premium-details-container">
+      <div className="premium-details-header">
+        <h1 className="premium-details-title">
           Room Details - Floor {room.floorNumber}, Room {room.roomNumber}
         </h1>
         <button
           onClick={() => navigate("/rooms")}
-          className="btn btn-secondary flex items-center"
+          className="premium-details-back"
         >
-          <FaArrowLeft className="mr-2" /> Back to Rooms
+          <FaArrowLeft className="premium-details-back-icon" /> Back to Rooms
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div>
-            <h2 className="text-lg font-medium text-gray-800 mb-4">
+      <div className="premium-grid">
+        <div className="premium-details-card">
+          <div className="premium-details-card-body">
+            <h2 className="premium-details-section-title">
+              <FaInfoCircle className="premium-details-section-icon" />
               Room Information
             </h2>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Floor:</span>
-                <span className="font-medium">{room.floorNumber}</span>
+            <div className="premium-details-info-list">
+              <div className="premium-details-info-item">
+                <span className="premium-details-info-label">
+                  <FaBuilding className="premium-details-info-icon" />
+                  Floor
+                </span>
+                <span className="premium-details-info-value">
+                  {room.floorNumber}
+                </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Room Number:</span>
-                <span className="font-medium">{room.roomNumber}</span>
+              <div className="premium-details-info-item">
+                <span className="premium-details-info-label">
+                  <FaBuilding className="premium-details-info-icon" />
+                  Room Number
+                </span>
+                <span className="premium-details-info-value">
+                  {room.roomNumber}
+                </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Capacity:</span>
-                <span className="font-medium">
+              <div className="premium-details-info-item">
+                <span className="premium-details-info-label">
+                  <FaUsers className="premium-details-info-icon" />
+                  Capacity
+                </span>
+                <span className="premium-details-info-value">
                   {room.capacity} {room.capacity > 1 ? "persons" : "person"}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Rent Amount:</span>
-                <span className="font-medium">₹{room.rentAmount}/month</span>
+              <div className="premium-details-info-item">
+                <span className="premium-details-info-label">
+                  <FaRupeeSign className="premium-details-info-icon" />
+                  Rent Amount
+                </span>
+                <span className="premium-details-info-value">
+                  ₹{room.rentAmount}/month
+                </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Occupancy:</span>
-                <span className="font-medium">
+              <div className="premium-details-info-item">
+                <span className="premium-details-info-label">
+                  <FaBed className="premium-details-info-icon" />
+                  Occupancy
+                </span>
+                <span className="premium-details-info-value">
                   {room.occupiedBeds}/{room.capacity} beds occupied
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Amenities:</span>
-                <span className="font-medium">
-                  {room.amenities.join(", ") || "None"}
+              <div className="premium-details-info-item">
+                <span className="premium-details-info-label">
+                  <FaListUl className="premium-details-info-icon" />
+                  Amenities
+                </span>
+                <span className="premium-details-info-value">
+                  {room.amenities.length > 0
+                    ? room.amenities.join(", ")
+                    : "None"}
                 </span>
               </div>
             </div>
-          </div>
 
-          <div>
-            <h2 className="text-lg font-medium text-gray-800 mb-4">
+            {room.description && (
+              <div className="premium-description">
+                <h3 className="premium-details-section-title">
+                  <FaInfoCircle className="premium-details-section-icon" />
+                  Description
+                </h3>
+                <p className="premium-description-text">{room.description}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="premium-details-card">
+          <div className="premium-details-card-body">
+            <h2 className="premium-details-section-title">
+              <FaLayerGroup className="premium-details-section-icon" />
               Bed Layout
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="premium-details-beds">
               {beds.map((bed) => (
                 <div
                   key={bed.id}
-                  className={`border rounded-lg p-4 flex flex-col items-center justify-center shadow-md transition-all duration-300 hover:shadow-lg ${
-                    bed.tenant
-                      ? "bg-gradient-to-br from-red-50 to-red-100 border-red-300"
-                      : "bg-gradient-to-br from-green-50 to-green-100 border-green-300"
+                  className={`premium-bed-card ${
+                    bed.tenant ? "premium-bed-occupied" : "premium-bed-vacant"
                   }`}
                 >
-                  <div className="text-center mb-2">
-                    <div className="flex justify-center mb-2">
-                      {bed.tenant ? (
-                        <FaUser className="h-8 w-8 text-red-500" />
-                      ) : (
-                        <FaBed className="h-8 w-8 text-green-500" />
-                      )}
-                    </div>
-                    <h3 className="font-medium">Bed {bed.id}</h3>
+                  <div className="premium-bed-icon-container">
                     {bed.tenant ? (
-                      <div className="mt-2 text-sm">
-                        <p className="font-semibold">{bed.tenant.name}</p>
-                        <p className="text-gray-600">{bed.tenant.phone}</p>
-                      </div>
+                      <FaUser className="premium-bed-icon" />
                     ) : (
-                      <div className="mt-2">
-                        <span className="px-2 py-1 bg-gradient-to-r from-green-400 to-green-500 text-white text-xs font-semibold rounded-full">
-                          Vacant
-                        </span>
-                      </div>
+                      <FaBed className="premium-bed-icon" />
                     )}
                   </div>
+                  <h3 className="premium-bed-title">Bed {bed.id}</h3>
+
                   {bed.tenant ? (
-                    <div className="mt-2 flex space-x-2">
-                      <Link
-                        to={`/tenants/edit/${bed.tenant._id}`}
-                        className="px-3 py-1 bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white rounded-full shadow-sm flex items-center text-xs font-semibold transition-all duration-200 transform hover:scale-105"
-                      >
-                        <FaEdit className="mr-1" /> Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDeleteTenant(bed.tenant._id)}
-                        className="px-3 py-1 bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white rounded-full shadow-sm flex items-center text-xs font-semibold transition-all duration-200 transform hover:scale-105"
-                        title="Remove tenant"
-                      >
-                        <FaTrash className="mr-1" /> Remove
-                      </button>
-                    </div>
+                    <>
+                      <div className="premium-bed-status">
+                        <FaUser className="mr-2" /> Occupied
+                      </div>
+                      <div className="premium-tenant-info">
+                        <p className="premium-tenant-name">{bed.tenant.name}</p>
+                        <p className="premium-tenant-phone">
+                          <FaPhone size={12} className="mr-1" />
+                          {bed.tenant.phone}
+                        </p>
+                      </div>
+                      <div className="premium-bed-actions">
+                        <Link
+                          to={`/tenants/edit/${bed.tenant._id}`}
+                          className="premium-action-btn premium-action-btn-primary"
+                          style={{
+                            transform: "translateY(0)",
+                            transition: "transform 0.4s ease",
+                            transitionDelay: "0.1s",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform =
+                              "translateY(-5px)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "translateY(0)";
+                          }}
+                        >
+                          <FaEdit className="premium-action-btn-icon" /> Edit
+                        </Link>
+                        <button
+                          onClick={() => handleDeleteTenant(bed.tenant._id)}
+                          className="premium-action-btn premium-action-btn-danger"
+                          title="Remove tenant"
+                          style={{
+                            transform: "translateY(0)",
+                            transition: "transform 0.4s ease",
+                            transitionDelay: "0.2s",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform =
+                              "translateY(-5px)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "translateY(0)";
+                          }}
+                        >
+                          <FaTrash className="premium-action-btn-icon" /> Remove
+                        </button>
+                      </div>
+                    </>
                   ) : (
-                    <button
-                      onClick={handleAddTenant}
-                      className="mt-2 px-3 py-1 bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white rounded-full shadow-sm flex items-center text-xs font-semibold transition-all duration-200 transform hover:scale-105"
-                    >
-                      <FaUserPlus className="mr-1" /> Add Tenant
-                    </button>
+                    <>
+                      <div className="premium-bed-status">
+                        <FaBed className="mr-2" /> Vacant
+                      </div>
+                      <button
+                        onClick={handleAddTenant}
+                        className="premium-action-btn premium-action-btn-primary"
+                        style={{
+                          transform: "translateY(0)",
+                          transition:
+                            "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform =
+                            "translateY(-5px) scale(1.05)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform =
+                            "translateY(0) scale(1)";
+                        }}
+                      >
+                        <FaUserPlus
+                          className="premium-action-btn-icon"
+                          style={{
+                            transition: "transform 0.4s ease",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = "rotate(15deg)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "rotate(0)";
+                          }}
+                        />
+                        Add Tenant
+                      </button>
+                    </>
                   )}
                 </div>
               ))}
             </div>
           </div>
         </div>
-
-        {room.description && (
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <h2 className="text-lg font-medium text-gray-800 mb-2">
-              Description
-            </h2>
-            <p className="text-gray-600">{room.description}</p>
-          </div>
-        )}
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-lg font-medium text-gray-800 mb-4">
-          Current Tenants
-        </h2>
-        {tenants.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Contact
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Joining Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {tenants.map((tenant) => (
-                  <tr key={tenant._id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {tenant.name}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {tenant.phone}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {tenant.email}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {new Date(tenant.joiningDate).toLocaleDateString()}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          tenant.active
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {tenant.active ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex justify-end space-x-3">
-                        <Link
-                          to={`/tenants/edit/${tenant._id}`}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          View Details
-                        </Link>
-                        <button
-                          onClick={() => handleDeleteTenant(tenant._id)}
-                          className="text-red-600 hover:text-red-900"
-                          title="Delete tenant"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </td>
+      <div className="premium-details-card" style={{ animationDelay: "0.3s" }}>
+        <div className="premium-details-card-body">
+          <h2 className="premium-details-section-title">
+            <FaUsers className="premium-details-section-icon" />
+            Current Tenants
+          </h2>
+
+          {tenants.length > 0 ? (
+            <div className="premium-tenants-table-container">
+              <table className="premium-tenants-table">
+                <thead className="premium-tenants-table-header">
+                  <tr>
+                    <th>Name</th>
+                    <th>Contact</th>
+                    <th>Joined Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="text-center py-4">
-            <p className="text-gray-500">No tenants in this room yet.</p>
-            <button
-              onClick={handleAddTenant}
-              className="mt-4 px-4 py-2 bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white rounded-full shadow-md flex items-center mx-auto font-semibold transition-all duration-200 transform hover:scale-105"
-            >
-              <FaUserPlus className="mr-2" /> Add Tenant
-            </button>
-          </div>
-        )}
+                </thead>
+                <tbody className="premium-tenants-table-body">
+                  {tenants.map((tenant) => (
+                    <tr key={tenant._id}>
+                      <td className="premium-tenant-name-cell">
+                        {tenant.name}
+                      </td>
+                      <td>
+                        <div className="premium-tenant-contact-cell">
+                          <div className="premium-tenant-phone-text">
+                            <FaPhone size={12} className="inline mr-1" />{" "}
+                            {tenant.phone}
+                          </div>
+                          {tenant.email && (
+                            <div className="premium-tenant-email-text">
+                              <FaEnvelope size={12} className="inline mr-1" />{" "}
+                              {tenant.email}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="premium-tenant-date-cell">
+                        <FaCalendarAlt size={12} className="inline mr-1" />
+                        {new Date(tenant.joiningDate).toLocaleDateString()}
+                      </td>
+                      <td>
+                        <span
+                          className={`premium-status-badge ${
+                            tenant.active
+                              ? "premium-status-active"
+                              : "premium-status-inactive"
+                          }`}
+                        >
+                          {tenant.active ? (
+                            <>
+                              <FaCheckCircle
+                                size={12}
+                                className="inline mr-1"
+                              />{" "}
+                              Active
+                            </>
+                          ) : (
+                            <>
+                              <FaTimesCircle
+                                size={12}
+                                className="inline mr-1"
+                              />{" "}
+                              Inactive
+                            </>
+                          )}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="premium-table-actions">
+                          <Link
+                            to={`/tenants/edit/${tenant._id}`}
+                            className="premium-table-action-link"
+                          >
+                            <FaEye size={14} /> View
+                          </Link>
+                          <button
+                            onClick={() => handleDeleteTenant(tenant._id)}
+                            className="premium-table-action-delete"
+                          >
+                            <FaTrash size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="premium-empty-state">
+              <FaExclamationCircle size={36} className="premium-empty-icon" />
+              <p className="premium-empty-text">No tenants in this room yet.</p>
+              <button
+                onClick={handleAddTenant}
+                className="premium-action-btn premium-action-btn-primary"
+              >
+                <FaUserPlus className="premium-action-btn-icon" /> Add Tenant
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

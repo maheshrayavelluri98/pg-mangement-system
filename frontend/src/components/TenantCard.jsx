@@ -1,28 +1,28 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { 
-  FaEdit, 
-  FaTrash, 
-  FaPhone, 
-  FaEnvelope, 
-  FaCalendarAlt, 
+import {
+  FaEdit,
+  FaTrash,
+  FaPhone,
+  FaEnvelope,
+  FaCalendarAlt,
   FaBuilding,
   FaIdCard,
   FaBriefcase,
-  FaUserCircle
+  FaUserCircle,
 } from "react-icons/fa";
 
 const TenantCard = ({ tenant, onDelete }) => {
-  const { 
-    _id, 
-    name, 
-    phone, 
-    email, 
-    roomId, 
-    joiningDate, 
-    active, 
-    idProofType, 
-    occupation 
+  const {
+    _id,
+    name,
+    phone,
+    email,
+    roomId,
+    joiningDate,
+    active,
+    idProofType,
+    occupation,
   } = tenant;
 
   // Format joining date
@@ -38,11 +38,14 @@ const TenantCard = ({ tenant, onDelete }) => {
   };
 
   return (
-    <div className="tenant-card">
+    <div
+      className="tenant-card"
+      onClick={() => navigate(`/tenants/edit/${_id}`)}
+    >
       <div className="tenant-card-header">
         <h3 className="tenant-card-title">{name}</h3>
       </div>
-      
+
       <div className="tenant-card-body">
         <div className="tenant-card-info">
           <div className="tenant-card-info-item">
@@ -52,7 +55,7 @@ const TenantCard = ({ tenant, onDelete }) => {
             <div className="tenant-card-info-label">Phone:</div>
             <div className="tenant-card-info-value">{phone}</div>
           </div>
-          
+
           <div className="tenant-card-info-item">
             <div className="tenant-card-info-icon">
               <FaEnvelope />
@@ -60,7 +63,7 @@ const TenantCard = ({ tenant, onDelete }) => {
             <div className="tenant-card-info-label">Email:</div>
             <div className="tenant-card-info-value">{email || "N/A"}</div>
           </div>
-          
+
           <div className="tenant-card-info-item">
             <div className="tenant-card-info-icon">
               <FaBuilding />
@@ -70,7 +73,7 @@ const TenantCard = ({ tenant, onDelete }) => {
               Floor {roomId.floorNumber}, Room {roomId.roomNumber}
             </div>
           </div>
-          
+
           <div className="tenant-card-info-item">
             <div className="tenant-card-info-icon">
               <FaCalendarAlt />
@@ -78,7 +81,7 @@ const TenantCard = ({ tenant, onDelete }) => {
             <div className="tenant-card-info-label">Joined:</div>
             <div className="tenant-card-info-value">{formattedDate}</div>
           </div>
-          
+
           <div className="tenant-card-info-item">
             <div className="tenant-card-info-icon">
               <FaIdCard />
@@ -86,7 +89,7 @@ const TenantCard = ({ tenant, onDelete }) => {
             <div className="tenant-card-info-label">ID Type:</div>
             <div className="tenant-card-info-value">{idProofType}</div>
           </div>
-          
+
           {occupation && (
             <div className="tenant-card-info-item">
               <div className="tenant-card-info-icon">
@@ -98,22 +101,26 @@ const TenantCard = ({ tenant, onDelete }) => {
           )}
         </div>
       </div>
-      
+
       <div className="tenant-card-status">
-        <div className={`tenant-status-badge ${active ? "tenant-status-active" : "tenant-status-inactive"}`}>
+        <div
+          className={`tenant-status-badge ${
+            active ? "tenant-status-active" : "tenant-status-inactive"
+          }`}
+        >
           <FaUserCircle className="mr-1" />
           <span>{active ? "Active" : "Inactive"}</span>
         </div>
       </div>
-      
-      <div className="tenant-card-actions">
-        <Link 
-          to={`/tenants/edit/${_id}`} 
+
+      <div className="tenant-card-actions" onClick={(e) => e.stopPropagation()}>
+        <Link
+          to={`/tenants/edit/${_id}`}
           className="tenant-card-btn tenant-card-btn-edit"
         >
           <FaEdit className="tenant-card-btn-icon" /> Edit
         </Link>
-        <button 
+        <button
           className="tenant-card-btn tenant-card-btn-delete"
           onClick={handleDelete}
         >

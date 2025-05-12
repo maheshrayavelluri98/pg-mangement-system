@@ -15,25 +15,16 @@ export const RoomProvider = ({ children }) => {
 
   // Fetch rooms on component mount
   useEffect(() => {
-    if (!initialized) {
-      fetchRooms();
-      setInitialized(true);
-    }
-  }, [initialized]);
+    fetchRooms();
+  }, []);
 
   // Fetch all rooms
   const fetchRooms = async () => {
-    // Don't set loading to true if we're already initialized and have rooms
-    if (!initialized || rooms.length === 0) {
-      setLoading(true);
-    }
-
+    setLoading(true);
     try {
       console.log("Fetching rooms...");
       const res = await axios.get("/rooms");
-
       if (res.data.success) {
-        console.log(`Fetched ${res.data.data.length} rooms successfully`);
         setRooms(res.data.data);
       } else {
         console.error("Error in API response:", res.data);

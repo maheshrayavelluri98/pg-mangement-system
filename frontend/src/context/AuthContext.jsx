@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }) => {
         baseURL: axios.defaults.baseURL,
       });
 
-      const res = await axios.post("/api/v1/admin/login", { email, password });
+      const res = await axios.post("/admin/login", { email, password });
       console.log("Login response:", res.data);
 
       if (res.data.success) {
@@ -96,7 +96,7 @@ export const AuthProvider = ({ children }) => {
 
         // Get admin data
         console.log("Fetching admin data...");
-        const adminRes = await axios.get("/api/v1/admin/me");
+        const adminRes = await axios.get("/admin/me");
         console.log("Admin data response:", adminRes.data);
 
         setAdmin(adminRes.data.data);
@@ -134,7 +134,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
 
     try {
-      const res = await axios.put("/api/v1/admin/updatedetails", adminData);
+      const res = await axios.put("/admin/updatedetails", adminData);
 
       if (res.data.success) {
         setAdmin(res.data.data);
@@ -154,7 +154,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
 
     try {
-      const res = await axios.put("/api/v1/admin/updatepassword", passwordData);
+      const res = await axios.put("/admin/updatepassword", passwordData);
 
       if (res.data.success) {
         toast.success("Password updated successfully!");

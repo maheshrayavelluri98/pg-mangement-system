@@ -1,6 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { FaSave, FaArrowLeft } from "react-icons/fa";
+import {
+  FaSave,
+  FaArrowLeft,
+  FaUser,
+  FaEnvelope,
+  FaPhone,
+  FaIdCard,
+  FaBriefcase,
+  FaBuilding,
+  FaCalendarAlt,
+  FaToggleOn,
+  FaUserFriends,
+  FaInfoCircle,
+  FaCheckCircle,
+} from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useRooms } from "../context/RoomContext";
@@ -37,6 +51,7 @@ const TenantForm = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(isEditMode);
+  const formRef = useRef(null);
 
   const {
     name,
@@ -59,6 +74,26 @@ const TenantForm = () => {
     "Voter ID",
     "Other",
   ];
+
+  // Animation effect for form fields
+  useEffect(() => {
+    if (!fetchLoading && formRef.current) {
+      const formGroups = formRef.current.querySelectorAll(
+        ".premium-tenant-form-group"
+      );
+
+      formGroups.forEach((group, index) => {
+        group.style.opacity = "0";
+        group.style.transform = "translateY(20px)";
+        group.style.transition = "all 0.4s ease";
+
+        setTimeout(() => {
+          group.style.opacity = "1";
+          group.style.transform = "translateY(0)";
+        }, 100 + index * 50); // Staggered animation
+      });
+    }
+  }, [fetchLoading]);
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -174,308 +209,327 @@ const TenantForm = () => {
 
   if (fetchLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="premium-tenant-loading">
+        <div className="premium-tenant-spinner"></div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">
+    <div className="premium-tenant-container">
+      <div className="premium-tenant-header">
+        <h1 className="premium-tenant-title">
           {isEditMode ? "Edit Tenant" : "Add New Tenant"}
         </h1>
         <button
           onClick={() => navigate("/tenants")}
-          className="btn btn-secondary flex items-center"
+          className="premium-tenant-back"
         >
-          <FaArrowLeft className="mr-2" /> Back to Tenants
+          <FaArrowLeft className="premium-tenant-back-icon" /> Back to Tenants
         </button>
       </div>
 
       {preselectedRoomId && (
-        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-md">
+        <div className="premium-tenant-alert">
           <div className="flex items-center">
-            <div className="py-1">
-              <p className="font-semibold">Room pre-selected from Rooms page</p>
-              <p className="text-sm">You can change the room if needed.</p>
+            <FaCheckCircle className="mr-2" size={18} />
+            <div>
+              <p className="premium-tenant-alert-title">
+                Room pre-selected from Rooms page
+              </p>
+              <p className="premium-tenant-alert-text">
+                You can change the room if needed.
+              </p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <form onSubmit={onSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Full Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={name}
-                onChange={onChange}
-                className="form-input"
-                required
-              />
-            </div>
+      <div className="premium-tenant-form-card">
+        <div className="premium-tenant-form-body">
+          <form onSubmit={onSubmit} ref={formRef}>
+            <div className="premium-tenant-form-grid">
+              <div className="premium-tenant-form-group">
+                <label htmlFor="name" className="premium-tenant-form-label">
+                  <FaUser className="inline-block mr-2" /> Full Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={name}
+                  onChange={onChange}
+                  className="premium-tenant-form-input"
+                  required
+                  placeholder="Enter tenant's full name"
+                />
+              </div>
 
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={email}
-                onChange={onChange}
-                className="form-input"
-              />
-            </div>
+              <div className="premium-tenant-form-group">
+                <label htmlFor="email" className="premium-tenant-form-label">
+                  <FaEnvelope className="inline-block mr-2" /> Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={email}
+                  onChange={onChange}
+                  className="premium-tenant-form-input"
+                  placeholder="Enter email address (optional)"
+                />
+              </div>
 
-            <div>
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Phone Number
-              </label>
-              <input
-                type="text"
-                id="phone"
-                name="phone"
-                value={phone}
-                onChange={onChange}
-                className="form-input"
-                required
-              />
-            </div>
+              <div className="premium-tenant-form-group">
+                <label htmlFor="phone" className="premium-tenant-form-label">
+                  <FaPhone className="inline-block mr-2" /> Phone Number
+                </label>
+                <input
+                  type="text"
+                  id="phone"
+                  name="phone"
+                  value={phone}
+                  onChange={onChange}
+                  className="premium-tenant-form-input"
+                  required
+                  placeholder="Enter phone number"
+                />
+              </div>
 
-            <div>
-              <label
-                htmlFor="occupation"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Occupation
-              </label>
-              <input
-                type="text"
-                id="occupation"
-                name="occupation"
-                value={occupation}
-                onChange={onChange}
-                className="form-input"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="idProofType"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                ID Proof Type
-              </label>
-              <select
-                id="idProofType"
-                name="idProofType"
-                value={idProofType}
-                onChange={onChange}
-                className="form-input"
-                required
-              >
-                {idProofTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="idProofNumber"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                ID Proof Number
-              </label>
-              <input
-                type="text"
-                id="idProofNumber"
-                name="idProofNumber"
-                value={idProofNumber}
-                onChange={onChange}
-                className="form-input"
-                required
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="roomId"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Room
-              </label>
-              <select
-                id="roomId"
-                name="roomId"
-                value={roomId}
-                onChange={onChange}
-                className={`form-input ${
-                  preselectedRoomId ? "border-green-500 bg-green-50" : ""
-                }`}
-                required
-              >
-                <option value="">Select a room</option>
-                {rooms.map((room) => (
-                  <option
-                    key={room._id}
-                    value={room._id}
-                    disabled={
-                      room.occupiedBeds >= room.capacity && room._id !== roomId
-                    }
-                    className={
-                      room._id === preselectedRoomId
-                        ? "bg-green-100 font-semibold"
-                        : ""
-                    }
-                  >
-                    Floor {room.floorNumber}, Room {room.roomNumber}
-                    {room.occupiedBeds > 0
-                      ? ` (${room.occupiedBeds}/${room.capacity} occupied)`
-                      : " (Vacant)"}
-                    {room._id === preselectedRoomId
-                      ? " ← Selected from Rooms page"
-                      : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="joiningDate"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Joining Date
-              </label>
-              <input
-                type="date"
-                id="joiningDate"
-                name="joiningDate"
-                value={joiningDate}
-                onChange={onChange}
-                className="form-input"
-                required
-              />
-            </div>
-
-            {isEditMode && (
-              <div>
+              <div className="premium-tenant-form-group">
                 <label
-                  htmlFor="active"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  htmlFor="occupation"
+                  className="premium-tenant-form-label"
                 >
-                  Status
+                  <FaBriefcase className="inline-block mr-2" /> Occupation
+                </label>
+                <input
+                  type="text"
+                  id="occupation"
+                  name="occupation"
+                  value={occupation}
+                  onChange={onChange}
+                  className="premium-tenant-form-input"
+                  placeholder="Enter occupation (optional)"
+                />
+              </div>
+
+              <div className="premium-tenant-form-group">
+                <label
+                  htmlFor="idProofType"
+                  className="premium-tenant-form-label"
+                >
+                  <FaIdCard className="inline-block mr-2" /> ID Proof Type
                 </label>
                 <select
-                  id="active"
-                  name="active"
-                  value={active.toString()}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      active: e.target.value === "true",
-                    })
-                  }
-                  className="form-input"
+                  id="idProofType"
+                  name="idProofType"
+                  value={idProofType}
+                  onChange={onChange}
+                  className="premium-tenant-form-select"
+                  required
                 >
-                  <option value="true">Active</option>
-                  <option value="false">Inactive</option>
+                  {idProofTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
                 </select>
               </div>
-            )}
-          </div>
 
-          <div className="mt-6 border-t border-gray-200 pt-6">
-            <h2 className="text-lg font-medium text-gray-800 mb-4">
-              Emergency Contact
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
+              <div className="premium-tenant-form-group">
                 <label
-                  htmlFor="emergency.name"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  htmlFor="idProofNumber"
+                  className="premium-tenant-form-label"
                 >
-                  Name
+                  <FaIdCard className="inline-block mr-2" /> ID Proof Number
                 </label>
                 <input
                   type="text"
-                  id="emergency.name"
-                  name="emergency.name"
-                  value={emergencyContact.name}
+                  id="idProofNumber"
+                  name="idProofNumber"
+                  value={idProofNumber}
                   onChange={onChange}
-                  className="form-input"
+                  className="premium-tenant-form-input"
+                  required
+                  placeholder="Enter ID proof number"
                 />
               </div>
 
-              <div>
-                <label
-                  htmlFor="emergency.phone"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+              <div className="premium-tenant-form-group">
+                <label htmlFor="roomId" className="premium-tenant-form-label">
+                  <FaBuilding className="inline-block mr-2" /> Room
+                </label>
+                <select
+                  id="roomId"
+                  name="roomId"
+                  value={roomId}
+                  onChange={onChange}
+                  className={`premium-tenant-form-select ${
+                    preselectedRoomId ? "border-green-500 bg-green-50" : ""
+                  }`}
+                  required
+                  style={{
+                    transition: "all 0.3s ease",
+                    borderColor: preselectedRoomId ? "#10b981" : "",
+                    boxShadow: preselectedRoomId
+                      ? "0 0 0 3px rgba(16, 185, 129, 0.1)"
+                      : "",
+                  }}
                 >
-                  Phone Number
+                  <option value="">Select a room</option>
+                  {rooms.map((room) => (
+                    <option
+                      key={room._id}
+                      value={room._id}
+                      disabled={
+                        room.occupiedBeds >= room.capacity &&
+                        room._id !== roomId
+                      }
+                      style={{
+                        backgroundColor:
+                          room._id === preselectedRoomId ? "#d1fae5" : "",
+                        fontWeight: room._id === preselectedRoomId ? "600" : "",
+                        padding: "8px",
+                      }}
+                    >
+                      Floor {room.floorNumber}, Room {room.roomNumber}
+                      {room.occupiedBeds > 0
+                        ? ` (${room.occupiedBeds}/${room.capacity} occupied)`
+                        : " (Vacant)"}
+                      {room._id === preselectedRoomId
+                        ? " ← Selected from Rooms page"
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="premium-tenant-form-group">
+                <label
+                  htmlFor="joiningDate"
+                  className="premium-tenant-form-label"
+                >
+                  <FaCalendarAlt className="inline-block mr-2" /> Joining Date
                 </label>
                 <input
-                  type="text"
-                  id="emergency.phone"
-                  name="emergency.phone"
-                  value={emergencyContact.phone}
+                  type="date"
+                  id="joiningDate"
+                  name="joiningDate"
+                  value={joiningDate}
                   onChange={onChange}
-                  className="form-input"
+                  className="premium-tenant-form-input"
+                  required
                 />
               </div>
 
-              <div>
-                <label
-                  htmlFor="emergency.relation"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Relation
-                </label>
-                <input
-                  type="text"
-                  id="emergency.relation"
-                  name="emergency.relation"
-                  value={emergencyContact.relation}
-                  onChange={onChange}
-                  className="form-input"
-                />
+              {isEditMode && (
+                <div className="premium-tenant-form-group">
+                  <label htmlFor="active" className="premium-tenant-form-label">
+                    <FaToggleOn className="inline-block mr-2" /> Status
+                  </label>
+                  <select
+                    id="active"
+                    name="active"
+                    value={active.toString()}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        active: e.target.value === "true",
+                      })
+                    }
+                    className="premium-tenant-form-select"
+                    style={{
+                      borderColor: active ? "#10b981" : "#ef4444",
+                      backgroundColor: active
+                        ? "rgba(16, 185, 129, 0.05)"
+                        : "rgba(239, 68, 68, 0.05)",
+                    }}
+                  >
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <div className="premium-tenant-form-divider">
+              <span className="premium-tenant-form-divider-title">
+                <FaUserFriends className="inline-block mr-2" /> Emergency
+                Contact
+              </span>
+              <div
+                className="premium-tenant-form-grid"
+                style={{ marginTop: "1.5rem" }}
+              >
+                <div className="premium-tenant-form-group">
+                  <label
+                    htmlFor="emergency.name"
+                    className="premium-tenant-form-label"
+                  >
+                    <FaUser className="inline-block mr-2" /> Name
+                  </label>
+                  <input
+                    type="text"
+                    id="emergency.name"
+                    name="emergency.name"
+                    value={emergencyContact.name}
+                    onChange={onChange}
+                    className="premium-tenant-form-input"
+                    placeholder="Enter emergency contact name"
+                  />
+                </div>
+
+                <div className="premium-tenant-form-group">
+                  <label
+                    htmlFor="emergency.phone"
+                    className="premium-tenant-form-label"
+                  >
+                    <FaPhone className="inline-block mr-2" /> Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    id="emergency.phone"
+                    name="emergency.phone"
+                    value={emergencyContact.phone}
+                    onChange={onChange}
+                    className="premium-tenant-form-input"
+                    placeholder="Enter emergency contact phone"
+                  />
+                </div>
+
+                <div className="premium-tenant-form-group">
+                  <label
+                    htmlFor="emergency.relation"
+                    className="premium-tenant-form-label"
+                  >
+                    <FaInfoCircle className="inline-block mr-2" /> Relation
+                  </label>
+                  <input
+                    type="text"
+                    id="emergency.relation"
+                    name="emergency.relation"
+                    value={emergencyContact.relation}
+                    onChange={onChange}
+                    className="premium-tenant-form-input"
+                    placeholder="Enter relation (e.g., Parent, Sibling)"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="mt-6">
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary flex items-center justify-center w-full md:w-auto"
-            >
-              <FaSave className="mr-2" />
-              {loading ? "Saving..." : "Save Tenant"}
-            </button>
-          </div>
-        </form>
+            <div className="mt-6">
+              <button
+                type="submit"
+                disabled={loading}
+                className="premium-tenant-submit-btn"
+              >
+                <FaSave className="premium-tenant-submit-icon" />
+                {loading ? "Saving..." : "Save Tenant"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

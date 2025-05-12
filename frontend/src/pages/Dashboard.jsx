@@ -8,6 +8,10 @@ import {
   FaMoneyBillWave,
   FaExclamationTriangle,
   FaSync,
+  FaArrowRight,
+  FaPlusCircle,
+  FaRegCalendarPlus,
+  FaChartLine,
 } from "react-icons/fa";
 
 const Dashboard = () => {
@@ -62,188 +66,286 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="premium-dashboard responsive-container">
+        <div className="premium-tenant-loading">
+          <div className="premium-tenant-spinner"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="bg-blue-600 text-white p-6 rounded-lg mb-8">
-        <h1 className="text-3xl font-bold mb-2">
-          Welcome to Sebzy PG Management
-        </h1>
-        <p className="text-blue-100">
-          Manage your PG hostel efficiently with our comprehensive dashboard
-        </p>
+    <div className="premium-dashboard responsive-container">
+      <div className="premium-welcome-banner">
+        <div className="premium-welcome-content">
+          <h1 className="premium-welcome-title">
+            Welcome to Sebzy PG Management
+          </h1>
+          <p className="premium-welcome-subtitle">
+            Manage your PG hostel efficiently with our comprehensive dashboard
+          </p>
+        </div>
       </div>
 
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">
-          Dashboard Overview
-        </h2>
+      <div className="premium-dashboard-header">
+        <h2 className="premium-dashboard-title">Dashboard Overview</h2>
         <button
           onClick={fetchStats}
-          className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+          className="premium-refresh-button"
           disabled={loading}
         >
-          <FaSync className={`mr-2 ${loading ? "animate-spin" : ""}`} />
+          <FaSync
+            className={`premium-refresh-icon ${loading ? "animate-spin" : ""}`}
+          />
           Refresh Stats
         </button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition-shadow duration-300">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white mr-4">
-              <FaDoorOpen className="h-6 w-6" />
+      <div className="premium-stats-container responsive-grid">
+        {/* Rooms Card */}
+        <Link to="/rooms" className="premium-stats-card rooms">
+          <div className="premium-stats-header">
+            <div
+              className="premium-stats-icon-wrapper"
+              style={{
+                background: "linear-gradient(135deg, #3b82f6, #1d4ed8)",
+              }}
+            >
+              <FaDoorOpen className="premium-stats-icon" />
             </div>
-            <div>
-              <p className="text-sm text-blue-600 uppercase font-medium">
+            <div className="premium-stats-info">
+              <div className="premium-stats-label" style={{ color: "#3b82f6" }}>
                 Total Rooms
-              </p>
-              <p className="text-2xl font-semibold text-gray-800">
-                {stats.totalRooms}
-              </p>
+              </div>
+              <div className="premium-stats-value">{stats.totalRooms}</div>
             </div>
           </div>
-          <div className="mt-4">
+          <div>
             <p className="text-sm text-gray-600">
               {stats.fullyOccupiedRooms} fully occupied,{" "}
               {stats.partiallyOccupiedRooms} partially occupied,{" "}
               {stats.totalRooms - stats.occupiedRooms} vacant
             </p>
-            <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2 overflow-hidden">
+            <div className="premium-progress-container">
               <div className="flex h-full">
                 <div
-                  className="bg-gradient-to-r from-blue-600 to-blue-800 h-2.5"
+                  className="premium-progress-bar"
                   style={{
                     width: `${
                       (stats.fullyOccupiedRooms / stats.totalRooms) * 100
                     }%`,
+                    background: "linear-gradient(to right, #3b82f6, #1d4ed8)",
                   }}
                 ></div>
                 <div
-                  className="bg-gradient-to-r from-blue-400 to-blue-500 h-2.5"
+                  className="premium-progress-bar"
                   style={{
                     width: `${
                       (stats.partiallyOccupiedRooms / stats.totalRooms) * 100
                     }%`,
+                    background: "linear-gradient(to right, #60a5fa, #3b82f6)",
                   }}
                 ></div>
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-md p-6 border-l-4 border-green-500 hover:shadow-lg transition-shadow duration-300">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white mr-4">
-              <FaUsers className="h-6 w-6" />
+          <div className="premium-stats-footer">
+            <div className="premium-stats-link" style={{ color: "#3b82f6" }}>
+              Manage rooms{" "}
+              <FaArrowRight className="premium-stats-link-icon" size={12} />
             </div>
-            <div>
-              <p className="text-sm text-green-600 uppercase font-medium">
+          </div>
+        </Link>
+
+        {/* Tenants Card */}
+        <Link to="/tenants" className="premium-stats-card tenants">
+          <div className="premium-stats-header">
+            <div
+              className="premium-stats-icon-wrapper"
+              style={{
+                background: "linear-gradient(135deg, #10b981, #059669)",
+              }}
+            >
+              <FaUsers className="premium-stats-icon" />
+            </div>
+            <div className="premium-stats-info">
+              <div className="premium-stats-label" style={{ color: "#10b981" }}>
                 Total Tenants
-              </p>
-              <p className="text-2xl font-semibold text-gray-800">
-                {stats.totalTenants}
-              </p>
+              </div>
+              <div className="premium-stats-value">{stats.totalTenants}</div>
             </div>
           </div>
-          <div className="mt-4">
-            <Link
-              to="/tenants"
-              className="text-sm text-green-600 hover:text-green-800 transition-colors"
-            >
-              View all tenants
-            </Link>
+          <div>
+            <p className="text-sm text-gray-600">
+              {stats.totalTenants > 0
+                ? `${Math.round(
+                    (stats.totalTenants / (stats.totalRooms * 2)) * 100
+                  )}% occupancy rate`
+                : "No tenants registered yet"}
+            </p>
+            <div className="premium-progress-container">
+              <div
+                className="premium-progress-bar"
+                style={{
+                  width: `${Math.min(
+                    (stats.totalTenants / (stats.totalRooms * 2)) * 100,
+                    100
+                  )}%`,
+                  background: "linear-gradient(to right, #10b981, #059669)",
+                }}
+              ></div>
+            </div>
           </div>
-        </div>
+          <div className="premium-stats-footer">
+            <div className="premium-stats-link" style={{ color: "#10b981" }}>
+              View all tenants{" "}
+              <FaArrowRight className="premium-stats-link-icon" size={12} />
+            </div>
+          </div>
+        </Link>
 
-        <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg shadow-md p-6 border-l-4 border-yellow-500 hover:shadow-lg transition-shadow duration-300">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 text-white mr-4">
-              <FaMoneyBillWave className="h-6 w-6" />
+        {/* Pending Rents Card */}
+        <Link to="/rent-management" className="premium-stats-card rents">
+          <div className="premium-stats-header">
+            <div
+              className="premium-stats-icon-wrapper"
+              style={{
+                background: "linear-gradient(135deg, #f59e0b, #d97706)",
+              }}
+            >
+              <FaMoneyBillWave className="premium-stats-icon" />
             </div>
-            <div>
-              <p className="text-sm text-yellow-600 uppercase font-medium">
+            <div className="premium-stats-info">
+              <div className="premium-stats-label" style={{ color: "#f59e0b" }}>
                 Pending Rents
-              </p>
-              <p className="text-2xl font-semibold text-gray-800">
-                {stats.pendingRents}
-              </p>
+              </div>
+              <div className="premium-stats-value">{stats.pendingRents}</div>
             </div>
           </div>
-          <div className="mt-4">
-            <Link
-              to="/rents"
-              className="text-sm text-yellow-600 hover:text-yellow-800 transition-colors"
-            >
-              View pending rents
-            </Link>
+          <div>
+            <p className="text-sm text-gray-600">
+              {stats.pendingRents > 0
+                ? `${stats.pendingRents} payment${
+                    stats.pendingRents !== 1 ? "s" : ""
+                  } due`
+                : "All rents are paid"}
+            </p>
+            <div className="premium-progress-container">
+              <div
+                className="premium-progress-bar"
+                style={{
+                  width: `${Math.min(
+                    (stats.pendingRents / stats.totalTenants) * 100,
+                    100
+                  )}%`,
+                  background: "linear-gradient(to right, #f59e0b, #d97706)",
+                }}
+              ></div>
+            </div>
           </div>
-        </div>
+          <div className="premium-stats-footer">
+            <div className="premium-stats-link" style={{ color: "#f59e0b" }}>
+              View pending rents{" "}
+              <FaArrowRight className="premium-stats-link-icon" size={12} />
+            </div>
+          </div>
+        </Link>
 
-        <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg shadow-md p-6 border-l-4 border-red-500 hover:shadow-lg transition-shadow duration-300">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white mr-4">
-              <FaExclamationTriangle className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-sm text-red-600 uppercase font-medium">
-                Vacant Rooms
-              </p>
-              <p className="text-2xl font-semibold text-gray-800">
-                {stats.totalRooms - stats.occupiedRooms}
-              </p>
-            </div>
-          </div>
-          <div className="mt-4">
-            <Link
-              to="/rooms"
-              className="text-sm text-red-600 hover:text-red-800 transition-colors"
+        {/* Vacant Rooms Card */}
+        <Link to="/rooms" className="premium-stats-card vacant">
+          <div className="premium-stats-header">
+            <div
+              className="premium-stats-icon-wrapper"
+              style={{
+                background: "linear-gradient(135deg, #ef4444, #dc2626)",
+              }}
             >
-              Manage rooms
-            </Link>
+              <FaExclamationTriangle className="premium-stats-icon" />
+            </div>
+            <div className="premium-stats-info">
+              <div className="premium-stats-label" style={{ color: "#ef4444" }}>
+                Vacant Rooms
+              </div>
+              <div className="premium-stats-value">
+                {stats.totalRooms - stats.occupiedRooms}
+              </div>
+            </div>
           </div>
-        </div>
+          <div>
+            <p className="text-sm text-gray-600">
+              {stats.totalRooms - stats.occupiedRooms > 0
+                ? `${Math.round(
+                    ((stats.totalRooms - stats.occupiedRooms) /
+                      stats.totalRooms) *
+                      100
+                  )}% vacancy rate`
+                : "All rooms are occupied"}
+            </p>
+            <div className="premium-progress-container">
+              <div
+                className="premium-progress-bar"
+                style={{
+                  width: `${
+                    ((stats.totalRooms - stats.occupiedRooms) /
+                      stats.totalRooms) *
+                    100
+                  }%`,
+                  background: "linear-gradient(to right, #ef4444, #dc2626)",
+                }}
+              ></div>
+            </div>
+          </div>
+          <div className="premium-stats-footer">
+            <div className="premium-stats-link" style={{ color: "#ef4444" }}>
+              Manage vacant rooms{" "}
+              <FaArrowRight className="premium-stats-link-icon" size={12} />
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          Quick Actions
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="premium-actions-section">
+        <h2 className="premium-actions-title">Quick Actions</h2>
+        <div className="premium-actions-grid responsive-flex">
           <Link
             to="/rooms/add"
-            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-lg text-center transition-all shadow-sm hover:shadow"
+            className="premium-action-button"
+            style={{
+              background: "linear-gradient(to right, #3b82f6, #1d4ed8)",
+            }}
           >
-            Add New Room
+            <FaPlusCircle className="mr-2" /> Add New Room
           </Link>
           <Link
             to="/tenants/add"
-            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-lg text-center transition-all shadow-sm hover:shadow"
+            className="premium-action-button"
+            style={{
+              background: "linear-gradient(to right, #10b981, #059669)",
+            }}
           >
-            Add New Tenant
+            <FaUsers className="mr-2" /> Add New Tenant
           </Link>
           <Link
             to="/rents/add"
-            className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white py-3 px-4 rounded-lg text-center transition-all shadow-sm hover:shadow"
+            className="premium-action-button"
+            style={{
+              background: "linear-gradient(to right, #f59e0b, #d97706)",
+            }}
           >
-            Record Rent Payment
+            <FaRegCalendarPlus className="mr-2" /> Record Rent Payment
           </Link>
         </div>
       </div>
 
       {/* Recent Activity - Placeholder */}
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg shadow-md p-6">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          Recent Activity
-        </h2>
-        <p className="text-gray-500 italic">No recent activity to display.</p>
+      <div className="premium-activity-section">
+        <h2 className="premium-activity-title">Recent Activity</h2>
+        <div className="premium-activity-empty">
+          <FaChartLine className="mx-auto mb-3 text-gray-400" size={24} />
+          <p>No recent activity to display.</p>
+        </div>
       </div>
     </div>
   );

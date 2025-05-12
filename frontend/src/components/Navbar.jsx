@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { FaBars, FaUserCircle, FaSignOutAlt, FaCog } from "react-icons/fa";
+import {
+  FaBars,
+  FaUserCircle,
+  FaSignOutAlt,
+  FaCog,
+  FaBell,
+  FaChevronDown,
+  FaUser,
+  FaBuilding,
+} from "react-icons/fa";
 
 const Navbar = ({ sidebarOpen, setSidebarOpen, auth }) => {
   const { admin, logout } = auth;
@@ -26,21 +35,14 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, auth }) => {
       <div className="px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <div className="flex items-center">
           <button
-            className="text-white bg-blue-600 hover:bg-blue-700 focus:outline-none lg:hidden p-2 rounded-md transition-colors duration-200"
-            onClick={() => {
-              console.log(
-                "Toggling sidebar from:",
-                sidebarOpen,
-                "to:",
-                !sidebarOpen
-              );
-              setSidebarOpen(!sidebarOpen);
-            }}
+            className="lg:hidden p-2 rounded-md transition-colors duration-200"
+            style={{ background: 'linear-gradient(90deg, #2563eb 0%, #1e40af 100%)' }}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-label="Toggle sidebar"
           >
-            <FaBars className="h-6 w-6" />
+            <FaBars className="h-6 w-6 text-white" />
           </button>
-          <h1 className="text-xl font-semibold ml-4 lg:ml-0">
+          <h1 className="text-xl font-semibold ml-4 lg:ml-0 hidden sm:block">
             <span className="text-blue-600 font-bold animate-slideRight">
               Sebzy
             </span>{" "}
@@ -49,44 +51,81 @@ const Navbar = ({ sidebarOpen, setSidebarOpen, auth }) => {
         </div>
 
         <div className="relative">
-          <div className="flex items-center">
-            <div className="hidden md:block mr-4">
-              <span className="text-sm text-gray-700">{admin?.name}</span>
+          <div className="premium-navbar-right">
+            {/* Navigation links */}
+            <div className="flex items-center gap-6">
+              <Link to="/dashboard" className="premium-navbar-nav-link">
+                <FaBuilding className="premium-navbar-nav-icon" />
+                <span>Dashboard</span>
+              </Link>
+              <Link to="/rooms" className="premium-navbar-nav-link">
+                <FaBuilding className="premium-navbar-nav-icon" />
+                <span>Rooms</span>
+              </Link>
+              <Link to="/tenants" className="premium-navbar-nav-link">
+                <FaUser className="premium-navbar-nav-icon" />
+                <span>Tenants</span>
+              </Link>
             </div>
-            <div className="relative" ref={dropdownRef}>
-              <button
-                className="flex items-center focus:outline-none"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-              >
-                <FaUserCircle className="h-8 w-8 text-gray-500" />
-              </button>
 
-              {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => setDropdownOpen(false)}
-                  >
-                    <div className="flex items-center">
-                      <FaCog className="mr-2" />
-                      Profile Settings
+            {/* User info and dropdown */}
+            <div className="premium-navbar-user-info">
+              <span className="premium-navbar-user-name">{admin?.name}</span>
+
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  className="premium-navbar-avatar-btn"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
+                  <FaUserCircle className="premium-navbar-avatar-icon" />
+                </button>
+
+                {dropdownOpen && (
+                  <div className="premium-navbar-dropdown">
+                    {/* User info section */}
+                    <div className="p-3 bg-gray-50 border-b border-gray-100">
+                      <div className="font-medium text-sm text-gray-800">
+                        {admin?.name}
+                      </div>
+                      <div className="text-xs text-gray-500 truncate">
+                        {admin?.email}
+                      </div>
                     </div>
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setDropdownOpen(false);
-                      logout();
-                    }}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    <div className="flex items-center">
-                      <FaSignOutAlt className="mr-2" />
+
+                    {/* Menu items */}
+                    <Link
+                      to="/profile"
+                      className="premium-navbar-dropdown-item"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <FaUser className="premium-navbar-dropdown-icon" />
+                      My Profile
+                    </Link>
+
+                    <Link
+                      to="/profile"
+                      className="premium-navbar-dropdown-item"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <FaCog className="premium-navbar-dropdown-icon" />
+                      Settings
+                    </Link>
+
+                    <div className="premium-navbar-dropdown-divider"></div>
+
+                    <button
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        logout();
+                      }}
+                      className="premium-navbar-dropdown-item w-full text-left"
+                    >
+                      <FaSignOutAlt className="premium-navbar-dropdown-icon" />
                       Logout
-                    </div>
-                  </button>
-                </div>
-              )}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -75,57 +75,63 @@ const Tenants = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-        <p className="text-gray-600">Loading tenants...</p>
+      <div className="responsive-container">
+        <div className="premium-tenant-loading">
+          <div className="premium-tenant-spinner"></div>
+          <p className="responsive-text text-gray-600 mt-4">
+            Loading tenants...
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Tenants</h1>
-        <Link to="/tenants/add" className="btn btn-primary flex items-center">
+    <div className="responsive-container">
+      <div className="responsive-flex-between responsive-mb">
+        <h1 className="responsive-title text-gray-800">Tenants</h1>
+        <Link to="/tenants/add" className="premium-room-add-btn">
           <FaPlus className="mr-2" /> Add Tenant
         </Link>
       </div>
 
       {/* Search and Filter Controls */}
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-6 flex flex-wrap gap-4">
-        <div className="flex-1 min-w-[200px]">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search by name, phone or email..."
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <FaSearch className="absolute left-3 top-3 text-gray-400" />
-          </div>
-        </div>
-
-        <div className="flex space-x-2">
-          <div className="flex items-center space-x-2">
-            <FaFilter className="text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">Status:</span>
+      <div className="responsive-card responsive-mb">
+        <div className="responsive-flex flex-wrap gap-4">
+          <div className="flex-1 min-w-[200px]">
+            <div className="responsive-input-with-icon">
+              <input
+                type="text"
+                placeholder="Search by name, phone or email..."
+                className="responsive-input w-full pr-4 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <FaSearch className="search-icon" />
+            </div>
           </div>
 
-          <select
-            className="rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="all">All Tenants</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
+          <div className="flex space-x-2">
+            <div className="flex items-center space-x-2">
+              <FaFilter className="text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">Status:</span>
+            </div>
+
+            <select
+              className="premium-tenant-form-select"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">All Tenants</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Tenant Cards Grid */}
-      <div className="tenant-cards-container">
+      <div className="tenant-cards-container responsive-grid">
         {filteredTenants.map((tenant) => (
           <TenantCard
             key={tenant._id}
@@ -137,8 +143,8 @@ const Tenants = () => {
 
       {/* Show message when no tenants match filters */}
       {filteredTenants.length === 0 && !loading && (
-        <div className="bg-white rounded-lg shadow-md p-8 text-center mt-6">
-          <p className="text-gray-600">
+        <div className="responsive-card text-center responsive-mt">
+          <p className="responsive-text text-gray-600">
             {tenants.length === 0
               ? "No tenants found. Add your first tenant to get started."
               : "No tenants match your search criteria. Try adjusting your filters."}
@@ -146,7 +152,7 @@ const Tenants = () => {
           {tenants.length === 0 && (
             <Link
               to="/tenants/add"
-              className="btn btn-primary inline-flex items-center mt-4"
+              className="premium-room-add-btn inline-flex mt-4"
             >
               <FaPlus className="mr-2" /> Add Your First Tenant
             </Link>
